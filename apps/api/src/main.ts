@@ -25,7 +25,9 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('DEALPORT API')
-    .setDescription('Admin dashboard API — auth, products, categories, tags, uploads, dashboard aggregations.')
+    .setDescription(
+      'Admin dashboard API — auth, products, categories, tags, uploads, dashboard aggregations.',
+    )
     .setVersion('1.0')
     .addBearerAuth()
     .build();
@@ -34,4 +36,4 @@ async function bootstrap() {
 
   await app.listen(config.get<string>('PORT', '3000'));
 }
-bootstrap();
+void bootstrap();

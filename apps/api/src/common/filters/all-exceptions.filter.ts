@@ -49,7 +49,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     const { statusCode, message, error } = this.resolve(exception);
 
-    if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
+    if (statusCode >= Number(HttpStatus.INTERNAL_SERVER_ERROR)) {
       this.logger.error(exception instanceof Error ? exception.stack : exception);
     }
 
@@ -74,7 +74,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const payload = exception.getResponse();
 
       if (typeof payload === 'string') {
-        return { statusCode: status, message: payload, error: REASON_PHRASES[status] ?? exception.name };
+        return {
+          statusCode: status,
+          message: payload,
+          error: REASON_PHRASES[status] ?? exception.name,
+        };
       }
 
       const { message, error } = payload as { message?: string | string[]; error?: string };
@@ -107,7 +111,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
         return 'Resource not found';
       case 'P2002': {
         const target = (exception.meta?.target as string[] | undefined)?.join(', ');
-        return target ? `A record with this ${target} already exists` : 'Unique constraint violation';
+        return target
+          ? `A record with this ${target} already exists`
+          : 'Unique constraint violation';
       }
       case 'P2003':
         return 'Related resource does not exist';

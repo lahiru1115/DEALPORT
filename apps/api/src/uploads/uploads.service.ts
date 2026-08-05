@@ -73,14 +73,17 @@ export class UploadsService {
 
   private uploadBuffer(buffer: Buffer): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream({ folder: CLOUDINARY_FOLDER }, (error, result) => {
-        if (error || !result) {
-          this.logger.error(error);
-          reject(new Error(error?.message ?? 'Cloudinary upload failed'));
-          return;
-        }
-        resolve(result);
-      });
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: CLOUDINARY_FOLDER },
+        (error, result) => {
+          if (error || !result) {
+            this.logger.error(error);
+            reject(new Error(error?.message ?? 'Cloudinary upload failed'));
+            return;
+          }
+          resolve(result);
+        },
+      );
       stream.end(buffer);
     });
   }

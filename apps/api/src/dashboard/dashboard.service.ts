@@ -80,20 +80,22 @@ export class DashboardService {
   async report(range: ReportRange) {
     const week = this.weekWindow(range === 'last-week' ? 1 : 0);
 
-    const [orders, distinctCustomers, totalProducts, stockProducts, outOfStock] = await Promise.all([
-      this.prisma.order.findMany({
-        where: { placedAt: { gte: week.start, lt: week.end } },
-        select: { placedAt: true, amount: true },
-      }),
-      this.prisma.order.findMany({
-        where: { placedAt: { gte: week.start, lt: week.end } },
-        select: { customerRef: true },
-        distinct: ['customerRef'],
-      }),
-      this.prisma.product.count(),
-      this.prisma.product.count({ where: { stockStatus: { not: StockStatus.OUT_OF_STOCK } } }),
-      this.prisma.product.count({ where: { stockStatus: StockStatus.OUT_OF_STOCK } }),
-    ]);
+    const [orders, distinctCustomers, totalProducts, stockProducts, outOfStock] = await Promise.all(
+      [
+        this.prisma.order.findMany({
+          where: { placedAt: { gte: week.start, lt: week.end } },
+          select: { placedAt: true, amount: true },
+        }),
+        this.prisma.order.findMany({
+          where: { placedAt: { gte: week.start, lt: week.end } },
+          select: { customerRef: true },
+          distinct: ['customerRef'],
+        }),
+        this.prisma.product.count(),
+        this.prisma.product.count({ where: { stockStatus: { not: StockStatus.OUT_OF_STOCK } } }),
+        this.prisma.product.count({ where: { stockStatus: StockStatus.OUT_OF_STOCK } }),
+      ],
+    );
 
     const series = WEEKDAY_LABELS.map((day, index) => {
       const dayStart = new Date(week.start.getTime() + index * DAY_MS);
@@ -156,7 +158,10 @@ export class DashboardService {
     const prev7End = last7Start;
     const prev7Start = new Date(prev7End.getTime() - 7 * DAY_MS);
 
-    return { last7: { start: last7Start, end: last7End }, prev7: { start: prev7Start, end: prev7End } };
+    return {
+      last7: { start: last7Start, end: last7End },
+      prev7: { start: prev7Start, end: prev7End },
+    };
   }
 
   private weekWindow(weeksAgo: number): Window {

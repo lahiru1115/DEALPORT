@@ -27,7 +27,8 @@ export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(query: ProductQueryDto) {
-    const { search, categoryId, status, stockStatus, featured, page, limit, sortBy, sortOrder } = query;
+    const { search, categoryId, status, stockStatus, featured, page, limit, sortBy, sortOrder } =
+      query;
 
     const where: Prisma.ProductWhereInput = {
       ...(search && {
@@ -129,9 +130,7 @@ export class ProductsService {
         colors: dto.colors,
         category: dto.categoryId !== undefined ? { connect: { id: dto.categoryId } } : undefined,
         tags: dto.tagIds ? { set: dto.tagIds.map((id) => ({ id })) } : undefined,
-        images: dto.images
-          ? { deleteMany: {}, create: this.toImageRows(dto.images) }
-          : undefined,
+        images: dto.images ? { deleteMany: {}, create: this.toImageRows(dto.images) } : undefined,
       },
       include: PRODUCT_INCLUDE,
     });
@@ -174,12 +173,22 @@ export class ProductsService {
 
   /** Cross-field rules the doc marks "service asserts" rather than a decorator (plans/02-API.md §3). */
   private assertPriceAndSaleWindow(
-    dto: Partial<Pick<CreateProductDto, 'price' | 'discountedPrice' | 'saleStartsAt' | 'saleEndsAt'>>,
+    dto: Partial<
+      Pick<CreateProductDto, 'price' | 'discountedPrice' | 'saleStartsAt' | 'saleEndsAt'>
+    >,
   ) {
-    if (dto.discountedPrice !== undefined && dto.price !== undefined && dto.discountedPrice >= dto.price) {
+    if (
+      dto.discountedPrice !== undefined &&
+      dto.price !== undefined &&
+      dto.discountedPrice >= dto.price
+    ) {
       throw new BadRequestException('discountedPrice must be less than price');
     }
-    if (dto.saleStartsAt && dto.saleEndsAt && new Date(dto.saleEndsAt) <= new Date(dto.saleStartsAt)) {
+    if (
+      dto.saleStartsAt &&
+      dto.saleEndsAt &&
+      new Date(dto.saleEndsAt) <= new Date(dto.saleStartsAt)
+    ) {
       throw new BadRequestException('saleEndsAt must be after saleStartsAt');
     }
   }
@@ -188,7 +197,7 @@ export class ProductsService {
     const base = slugify(name);
     let slug = base;
     let suffix = 1;
-    // eslint-disable-next-line no-await-in-loop -- sequential by design: each check depends on the previous suffix
+
     while (await this.prisma.product.findUnique({ where: { slug }, select: { id: true } })) {
       slug = `${base}-${++suffix}`;
     }
@@ -200,7 +209,7 @@ export class ProductsService {
     let existing: { id: string } | null;
     do {
       sku = `FXZ-${Math.floor(1000 + Math.random() * 9000)}`;
-      // eslint-disable-next-line no-await-in-loop -- retry-until-unique by design, collisions are rare
+
       existing = await this.prisma.product.findUnique({ where: { sku }, select: { id: true } });
     } while (existing);
     return sku;
@@ -211,7 +220,9 @@ export class ProductsService {
  * Prisma's Decimal#toString() strips trailing zeros ("999" instead of "999.00") —
  * money fields are formatted to a fixed 2dp string to match plans/02-API.md's contract.
  */
-function formatProductMoney<T extends { price: Prisma.Decimal; discountedPrice: Prisma.Decimal | null }>(
+function formatProductMoney<
+  T extends { price: Prisma.Decimal; discountedPrice: Prisma.Decimal | null },
+>(
   product: T,
 ): Omit<T, 'price' | 'discountedPrice'> & { price: string; discountedPrice: string | null } {
   return {
@@ -221,7 +232,9 @@ function formatProductMoney<T extends { price: Prisma.Decimal; discountedPrice: 
   };
 }
 
-function formatWidgetMoney<T extends { price: Prisma.Decimal }>(product: T): Omit<T, 'price'> & { price: string } {
+function formatWidgetMoney<T extends { price: Prisma.Decimal }>(
+  product: T,
+): Omit<T, 'price'> & { price: string } {
   return { ...product, price: product.price.toFixed(2) };
 }
 

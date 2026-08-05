@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import type { StringValue } from 'ms';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -18,8 +19,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>('JWT_SECRET'),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- expiresIn accepts a duration string, but @nestjs/config only types get() as `string`
-        signOptions: { expiresIn: config.get<string>('JWT_EXPIRES_IN', '7d') as any },
+        signOptions: { expiresIn: config.get<string>('JWT_EXPIRES_IN', '7d') as StringValue },
       }),
     }),
   ],
