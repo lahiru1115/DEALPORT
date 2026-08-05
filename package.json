@@ -13,7 +13,11 @@
     "test": "npm run test -w @dealport/api",
     "test:e2e": "npm run test:e2e -w @dealport/api",
     "db:up": "docker compose up -d",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "db:migrate": "npm run prisma:migrate -w @dealport/api",
+    "db:seed": "npm run prisma:seed -w @dealport/api",
+    "db:reset": "npm run prisma:reset -w @dealport/api",
+    "db:studio": "npm run prisma:studio -w @dealport/api"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
