@@ -465,7 +465,7 @@ const CUSTOMER_NAMES = [
 // ---------------------------------------------------------------------------
 
 async function seedUser() {
-  const passwordHash = await bcrypt.hash('Admin@123', 10);
+  const passwordHash = await bcrypt.hash('Admin@123', 10); // gitleaks:allow — intentionally public seed/demo credential, per brief §9
   const user = await prisma.user.upsert({
     where: { email: 'admin@dealport.com' },
     update: { name: 'Dealport Admin', passwordHash, role: 'ADMIN' },
@@ -477,7 +477,7 @@ async function seedUser() {
       avatarUrl: 'https://i.pravatar.cc/128?img=12',
     },
   });
-  console.log(`  user       admin@dealport.com / Admin@123`);
+  console.log(`  user       admin@dealport.com / Admin@123`); // gitleaks:allow — intentionally public seed/demo credential, per brief §9
   return user;
 }
 

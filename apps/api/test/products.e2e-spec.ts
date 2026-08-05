@@ -30,7 +30,7 @@ describe('Products (e2e)', () => {
 
     const login = await request(server)
       .post('/auth/login')
-      .send({ email: 'admin@dealport.com', password: 'Admin@123' })
+      .send({ email: 'admin@dealport.com', password: 'Admin@123' }) // gitleaks:allow — seeded demo credential, documented in prisma/seed.ts
       .expect(200);
     token = login.body.accessToken;
   });
@@ -43,10 +43,10 @@ describe('Products (e2e)', () => {
     it('rejects an unknown email and a wrong password with an identical response', async () => {
       const unknownEmail = await request(server)
         .post('/auth/login')
-        .send({ email: 'ghost@dealport.com', password: 'whatever1' });
+        .send({ email: 'ghost@dealport.com', password: 'whatever1' }); // gitleaks:allow — placeholder, not a real credential
       const wrongPassword = await request(server)
         .post('/auth/login')
-        .send({ email: 'admin@dealport.com', password: 'wrong-password' });
+        .send({ email: 'admin@dealport.com', password: 'wrong-password' }); // gitleaks:allow — deliberately wrong password fixture
 
       expect(unknownEmail.status).toBe(401);
       expect(wrongPassword.status).toBe(401);

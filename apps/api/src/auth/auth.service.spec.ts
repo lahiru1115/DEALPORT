@@ -46,7 +46,7 @@ describe('AuthService', () => {
       usersService.findByEmail.mockResolvedValue(null);
 
       await expect(
-        service.login({ email: 'nobody@dealport.com', password: 'whatever1' }),
+        service.login({ email: 'nobody@dealport.com', password: 'whatever1' }), // gitleaks:allow — placeholder, not a real credential
       ).rejects.toBeInstanceOf(UnauthorizedException);
       expect(mockedBcrypt.compare).not.toHaveBeenCalled();
     });
@@ -65,7 +65,7 @@ describe('AuthService', () => {
       usersService.findByEmail.mockResolvedValueOnce(null);
       let unknownEmailError: UnauthorizedException | undefined;
       try {
-        await service.login({ email: 'ghost@dealport.com', password: 'whatever1' });
+        await service.login({ email: 'ghost@dealport.com', password: 'whatever1' }); // gitleaks:allow — placeholder, not a real credential
       } catch (error) {
         unknownEmailError = error as UnauthorizedException;
       }
@@ -89,7 +89,7 @@ describe('AuthService', () => {
       usersService.findByEmail.mockResolvedValue(seededUser);
       mockedBcrypt.compare.mockResolvedValue(true as never);
 
-      const result = await service.login({ email: seededUser.email, password: 'Admin@123' });
+      const result = await service.login({ email: seededUser.email, password: 'Admin@123' }); // gitleaks:allow — seeded demo credential, documented in prisma/seed.ts
 
       expect(jwtService.signAsync).toHaveBeenCalledWith({
         sub: seededUser.id,
