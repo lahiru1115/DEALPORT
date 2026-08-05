@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { HealthModule } from './health/health.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
 import { TagsModule } from './tags/tags.module';
@@ -22,6 +23,7 @@ import { UsersModule } from './users/users.module';
     ProductsModule,
     UploadsModule,
     DashboardModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

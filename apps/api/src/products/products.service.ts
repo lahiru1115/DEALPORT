@@ -54,7 +54,7 @@ export class ProductsService {
       this.prisma.product.count({ where }),
     ]);
 
-    return paginate(data, total, page, limit);
+    return paginate(data.map(formatProductMoney), total, page, limit);
   }
 
   async findOne(id: string) {
@@ -67,7 +67,7 @@ export class ProductsService {
       throw new NotFoundException(`Product with id '${id}' not found`);
     }
 
-    return product;
+    return formatProductMoney(product);
   }
 
   async create(dto: CreateProductDto) {
@@ -79,7 +79,7 @@ export class ProductsService {
     const slug = await this.generateUniqueSlug(dto.name);
     const sku = await this.generateUniqueSku();
 
-    return this.prisma.product.create({
+    const product = await this.prisma.product.create({
       data: {
         name: dto.name,
         slug,
@@ -103,13 +103,14 @@ export class ProductsService {
       },
       include: PRODUCT_INCLUDE,
     });
+    return formatProductMoney(product);
   }
 
   async update(id: string, dto: UpdateProductDto) {
     await this.findOne(id);
     this.assertPriceAndSaleWindow(dto);
 
-    return this.prisma.product.update({
+    const product = await this.prisma.product.update({
       where: { id },
       data: {
         name: dto.name,
@@ -134,6 +135,7 @@ export class ProductsService {
       },
       include: PRODUCT_INCLUDE,
     });
+    return formatProductMoney(product);
   }
 
   async remove(id: string): Promise<void> {
@@ -141,22 +143,24 @@ export class ProductsService {
     await this.prisma.product.delete({ where: { id } });
   }
 
-  topProducts(limit: number) {
-    return this.prisma.product.findMany({
+  async topProducts(limit: number) {
+    const products = await this.prisma.product.findMany({
       where: { status: ProductStatus.PUBLISHED },
       orderBy: { totalOrders: 'desc' },
       take: limit,
       select: WIDGET_SELECT,
     });
+    return products.map(formatWidgetMoney);
   }
 
-  bestSelling(limit: number) {
-    return this.prisma.product.findMany({
+  async bestSelling(limit: number) {
+    const products = await this.prisma.product.findMany({
       where: { status: ProductStatus.PUBLISHED },
       orderBy: { totalOrders: 'desc' },
       take: limit,
       select: WIDGET_SELECT,
     });
+    return products.map(formatWidgetMoney);
   }
 
   private toImageRows(images: NonNullable<CreateProductDto['images']>) {
@@ -201,6 +205,24 @@ export class ProductsService {
     } while (existing);
     return sku;
   }
+}
+
+/**
+ * Prisma's Decimal#toString() strips trailing zeros ("999" instead of "999.00") —
+ * money fields are formatted to a fixed 2dp string to match plans/02-API.md's contract.
+ */
+function formatProductMoney<T extends { price: Prisma.Decimal; discountedPrice: Prisma.Decimal | null }>(
+  product: T,
+): Omit<T, 'price' | 'discountedPrice'> & { price: string; discountedPrice: string | null } {
+  return {
+    ...product,
+    price: product.price.toFixed(2),
+    discountedPrice: product.discountedPrice?.toFixed(2) ?? null,
+  };
+}
+
+function formatWidgetMoney<T extends { price: Prisma.Decimal }>(product: T): Omit<T, 'price'> & { price: string } {
+  return { ...product, price: product.price.toFixed(2) };
 }
 
 function slugify(value: string): string {
