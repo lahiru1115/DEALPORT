@@ -14,6 +14,17 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 /**
+ * The seeded demo account (brief §9) — kept out of the rendered UI entirely
+ * (see the "Continue with demo account" button below) rather than printed on
+ * the page for a reviewer to copy, so there's nothing to select/paste and
+ * nothing that looks like a real credential leaking onto the screen.
+ */
+const DEMO_CREDENTIALS: LoginInput = {
+  email: "admin@dealport.com",
+  password: "Admin@123",
+};
+
+/**
  * Only the *path* is honoured, and only when it is a single-segment-rooted
  * relative path. `//evil.com` and `https://evil.com` are both valid values for
  * a query parameter and both would be treated as absolute by the router, so a
@@ -30,6 +41,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const [formError, setFormError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isDemoLoading, setIsDemoLoading] = useState(false);
 
   const {
     register,
@@ -40,7 +52,8 @@ export function LoginForm() {
     defaultValues: { email: "", password: "" },
   });
 
-  async function onSubmit(values: LoginInput) {
+  /** Shared by the real form submit and the one-click demo button. */
+  async function performLogin(values: LoginInput) {
     setFormError(null);
 
     let response: Response;
@@ -70,8 +83,19 @@ export function LoginForm() {
     router.push(safeRedirectTarget(searchParams.get("next")));
   }
 
+  async function handleDemoLogin() {
+    setIsDemoLoading(true);
+    try {
+      await performLogin(DEMO_CREDENTIALS);
+    } finally {
+      setIsDemoLoading(false);
+    }
+  }
+
+  const busy = isSubmitting || isDemoLoading;
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+    <div className="space-y-5">
       {formError ? (
         <p
           role="alert"
@@ -81,76 +105,101 @@ export function LoginForm() {
         </p>
       ) : null}
 
-      <div className="space-y-2">
-        <Label htmlFor="email" className="font-bold text-cyprus">
-          Email
-        </Label>
-        <Input
-          id="email"
-          type="email"
-          autoComplete="email"
-          placeholder="admin@dealport.com"
-          aria-invalid={Boolean(errors.email)}
-          aria-describedby={errors.email ? "email-error" : undefined}
-          {...register("email")}
-        />
-        {errors.email ? (
-          <p id="email-error" className="text-caption text-error">
-            {errors.email.message}
-          </p>
-        ) : null}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="password" className="font-bold text-cyprus">
-          Password
-        </Label>
-        <div className="relative">
+      <form onSubmit={handleSubmit(performLogin)} noValidate className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="email" className="font-bold text-cyprus">
+            Email
+          </Label>
           <Input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            autoComplete="current-password"
-            placeholder="••••••••"
-            className="pr-12"
-            aria-invalid={Boolean(errors.password)}
-            aria-describedby={errors.password ? "password-error" : undefined}
-            {...register("password")}
+            id="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? "email-error" : undefined}
+            {...register("email")}
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword((visible) => !visible)}
-            className={cn(
-              "absolute inset-y-0 right-0 grid w-12 place-items-center rounded-r-lg",
-              "text-grey transition-colors hover:text-cyprus",
-              "focus-visible:ring-3 focus-visible:ring-ring/25 focus-visible:outline-none",
-            )}
-            // The control toggles visibility; its label states what it will do.
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? (
-              <EyeOffIcon className="size-5" />
-            ) : (
-              <EyeIcon className="size-5" />
-            )}
-          </button>
+          {errors.email ? (
+            <p id="email-error" className="text-caption text-error">
+              {errors.email.message}
+            </p>
+          ) : null}
         </div>
-        {errors.password ? (
-          <p id="password-error" className="text-caption text-error">
-            {errors.password.message}
-          </p>
-        ) : null}
+
+        <div className="space-y-2">
+          <Label htmlFor="password" className="font-bold text-cyprus">
+            Password
+          </Label>
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
+              placeholder="••••••••"
+              className="pr-12"
+              aria-invalid={Boolean(errors.password)}
+              aria-describedby={errors.password ? "password-error" : undefined}
+              {...register("password")}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((visible) => !visible)}
+              className={cn(
+                "absolute inset-y-0 right-0 grid w-12 place-items-center rounded-r-lg",
+                "text-grey transition-colors hover:text-cyprus",
+                "focus-visible:ring-3 focus-visible:ring-ring/25 focus-visible:outline-none",
+              )}
+              // The control toggles visibility; its label states what it will do.
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOffIcon className="size-5" />
+              ) : (
+                <EyeIcon className="size-5" />
+              )}
+            </button>
+          </div>
+          {errors.password ? (
+            <p id="password-error" className="text-caption text-error">
+              {errors.password.message}
+            </p>
+          ) : null}
+        </div>
+
+        <Button type="submit" disabled={busy} className="w-full">
+          {isSubmitting ? (
+            <>
+              <Loader2Icon className="animate-spin" />
+              Signing in…
+            </>
+          ) : (
+            "Sign in"
+          )}
+        </Button>
+      </form>
+
+      <div className="flex items-center gap-3">
+        <div className="h-px flex-1 bg-hairline" />
+        <span className="text-caption text-grey">or</span>
+        <div className="h-px flex-1 bg-hairline" />
       </div>
 
-      <Button type="submit" disabled={isSubmitting} className="w-full">
-        {isSubmitting ? (
+      <Button
+        type="button"
+        variant="outline"
+        disabled={busy}
+        onClick={handleDemoLogin}
+        className="w-full"
+      >
+        {isDemoLoading ? (
           <>
             <Loader2Icon className="animate-spin" />
             Signing in…
           </>
         ) : (
-          "Sign in"
+          "Continue with demo account"
         )}
       </Button>
-    </form>
+    </div>
   );
 }

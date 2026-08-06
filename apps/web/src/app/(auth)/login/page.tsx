@@ -45,17 +45,6 @@ export default function LoginPage() {
             <LoginForm />
           </Suspense>
         </div>
-
-        {/*
-          Seeded demo credentials, shown deliberately. The brief (§9) asks for
-          credentials a reviewer can use immediately, and this account exists
-          only in the seeded demo database.
-        */}
-        <p className="mt-6 text-center text-caption text-grey">
-          Demo account —{" "}
-          <span className="font-bold text-cyprus">admin@dealport.com</span> /{" "}
-          <span className="font-bold text-cyprus">Admin@123</span>
-        </p>
       </div>
     </main>
   );
