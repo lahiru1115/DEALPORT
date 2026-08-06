@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
-import { Sidebar } from "@/components/shell/sidebar";
-import { Topbar } from "@/components/shell/topbar";
+import { DashboardShell } from "@/components/shell/dashboard-shell";
 import { requireSession } from "@/lib/auth/session";
 
 /**
@@ -12,14 +11,5 @@ import { requireSession } from "@/lib/auth/session";
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   const user = await requireSession();
 
-  return (
-    <div className="min-h-dvh bg-canvas">
-      <Sidebar user={user} />
-      <div className="flex min-h-dvh flex-col pl-sidebar">
-        <Topbar user={user} />
-        {/* Content insets measured off `2 Dashboard.png` / `6 Categories.png` / `8 Add Product.png` — asymmetric on purpose (20 left, 44 right). */}
-        <main className="flex-1 py-5 pr-11 pl-5">{children}</main>
-      </div>
-    </div>
-  );
+  return <DashboardShell user={user}>{children}</DashboardShell>;
 }

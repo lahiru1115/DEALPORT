@@ -83,6 +83,7 @@
 
   /* ---- Shell metrics, measured off every screen (they agree exactly) ---- */
   --spacing-sidebar: 260px;
+  --spacing-sidebar-collapsed: 72px;
   --spacing-topbar: 96px;
 
   /* Recharts series colours — the report chart is single-series ocean green */
