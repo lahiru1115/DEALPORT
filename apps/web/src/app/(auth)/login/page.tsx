@@ -21,10 +21,10 @@ export default function LoginPage() {
       <div className="w-full max-w-105">
         <div className="mb-8 flex justify-center">
           <Image
-            src="/brand/dealport-logo.png"
+            src="/brand/dealport-logo.svg"
             alt="DEALPORT"
-            width={122}
-            height={19}
+            width={181}
+            height={38}
             priority
             className="h-5 w-auto"
           />
