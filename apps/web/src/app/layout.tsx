@@ -35,7 +35,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${lato.variable} antialiased`}>
+      {/*
+        Browser extensions (Grammarly, password managers, etc.) inject
+        attributes onto `<body>` before React hydrates, which React then
+        reports as a mismatch even though nothing is actually wrong.
+      */}
+      <body className={`${lato.variable} antialiased`} suppressHydrationWarning>
         <Providers>{children}</Providers>
         <Toaster />
       </body>
