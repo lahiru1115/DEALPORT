@@ -42,10 +42,21 @@ export async function POST(request: Request) {
   }
 
   try {
+    // The API sees this request coming from this server, not the browser —
+    // forward the browser's real IP/user-agent so the login-event audit log
+    // (apps/api/src/auth/auth.controller.ts `resolveClientIp`) records the
+    // actual client, not this process.
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const userAgent = request.headers.get("user-agent");
+
     const result = await executeRequest<LoginResponse>(API_URL, "/auth/login", {
       method: "POST",
       json: parsed.data,
       cache: "no-store",
+      headers: {
+        ...(forwardedFor && { "X-Forwarded-For": forwardedFor }),
+        ...(userAgent && { "User-Agent": userAgent }),
+      },
     });
 
     await setAuthCookie(result.accessToken);

@@ -53,9 +53,30 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  products Product[]
+  products    Product[]
+  loginEvents LoginEvent[]
 
   @@map("users")
+}
+
+// One row per login attempt (success and failure) — an audit trail of who
+// logged in when, from where, and with what client. `email`/`success` are
+// kept even when `userId` is null so failed attempts against unknown emails
+// still show up in the trail.
+model LoginEvent {
+  id        String   @id @default(cuid())
+  email     String
+  success   Boolean
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("login_events")
 }
 
 model Category {

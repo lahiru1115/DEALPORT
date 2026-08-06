@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import type { User } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 
@@ -13,16 +14,39 @@ export interface AuthUserResponse {
   avatarUrl: string | null;
 }
 
+export interface LoginContext {
+  ipAddress: string | null;
+  userAgent: string | null;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
   ) {}
 
-  async login(dto: LoginDto): Promise<{ accessToken: string; user: AuthUserResponse }> {
+  async login(
+    dto: LoginDto,
+    context: LoginContext,
+  ): Promise<{ accessToken: string; user: AuthUserResponse }> {
     const user = await this.usersService.findByEmail(dto.email);
     const passwordValid = user ? await bcrypt.compare(dto.password, user.passwordHash) : false;
+    const success = Boolean(user && passwordValid);
+
+    // Logged for both outcomes — a failed attempt (wrong password, or an
+    // unknown email) is exactly what an audit trail of login activity needs
+    // to show, not just successes.
+    await this.prisma.loginEvent.create({
+      data: {
+        email: dto.email,
+        success,
+        ipAddress: context.ipAddress,
+        userAgent: context.userAgent,
+        userId: user?.id,
+      },
+    });
 
     // Deliberately identical outcome for "unknown email" and "wrong password" —
     // this endpoint must not be usable to enumerate accounts (plans/02-API.md §2).
