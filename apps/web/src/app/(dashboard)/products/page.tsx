@@ -1,10 +1,18 @@
-import { Card } from "@/components/ui/card";
+import { Suspense } from "react";
+import type { Metadata } from "next";
 
-// Placeholder — Step 5 replaces this with the real product list.
+import { ProductList } from "@/components/products/product-list";
+
+export const metadata: Metadata = {
+  title: "Products",
+};
+
 export default function ProductsPage() {
+  // `useSearchParams` in ProductList opts the subtree into client rendering,
+  // so the boundary is required for the page to prerender.
   return (
-    <Card>
-      <p className="text-caption text-grey">Product list lands in Step 5.</p>
-    </Card>
+    <Suspense fallback={null}>
+      <ProductList />
+    </Suspense>
   );
 }
