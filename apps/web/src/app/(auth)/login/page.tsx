@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <main className="grid min-h-dvh place-items-center bg-canvas px-5 py-10">
-      <div className="w-full max-w-[420px]">
+      <div className="w-full max-w-105">
         <div className="mb-8 flex justify-center">
           <Image
             src="/brand/dealport-logo.png"
@@ -41,7 +41,7 @@ export default function LoginPage() {
             client-side rendering, so the boundary is required for the page to
             prerender.
           */}
-          <Suspense fallback={<div className="h-[360px]" />}>
+          <Suspense fallback={<div className="h-90" />}>
             <LoginForm />
           </Suspense>
         </div>
