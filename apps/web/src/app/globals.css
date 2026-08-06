@@ -1,26 +1,208 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/*
+  DEALPORT theme.
+
+  Palette and type come from `design/design-system/`. Everything else —
+  neutrals, radii, elevation, shell metrics — was measured directly off the
+  2x screen exports in `design/screens/` rather than eyeballed, because the
+  written spec and the actual artwork disagree in a few places. Measured
+  values win, and the ones that differ from plans/03-DESIGN-SYSTEM.md are
+  called out inline.
+
+  Two layers, deliberately:
+   1. `@theme` holds the kit's own named tokens. A plain `@theme` (not
+      `inline`) is required: it both generates utilities *and* emits the custom
+      properties, so `:root` and the Recharts props can reference them.
+   2. `@theme inline` maps shadcn's semantic aliases onto those tokens, so the
+      unmodified shadcn primitives inherit the theme rather than needing every
+      utility class rewritten.
+
+  No dark mode: brief §5 puts theme polish out of scope and the topbar toggle
+  is documented as inert. The `dark` variant stays registered only because the
+  shadcn primitives ship `dark:` classes; `.dark` is never applied to the tree.
+*/
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* ---- Brand + status, from `design/design-system/Color Scheme.png` ---- */
+  --color-ocean-green: #4ea674;
+  --color-cyprus: #023337;
+  --color-surf-crest: #c1e6ba;
+  --color-aqua-spring: #eaf8e7;
+  --color-indigo: #6467f2;
+  --color-success: #21c45d;
+  --color-pending: #f0d411;
+  --color-error: #ef4343;
+  --color-grey: #7c7c7c;
+
+  /*
+    Neutrals — sampled from the exports, not from the token sheet.
+    The page canvas, the sidebar's right border and every input fill were read
+    off `2 Dashboard.png` / `8 Add Product.png`. Note the canvas and the input
+    fill are the *same* colour: fields read as recessed only because they sit
+    on a white card.
+  */
+  --color-canvas: #f9fafb;
+  --color-surface: #ffffff;
+  --color-hairline: #ecedee;
+
+  /* ---- Type ---- */
+  --font-sans: var(--font-lato), ui-sans-serif, system-ui, sans-serif;
+
+  /*
+    Radii, each fitted to the corner curve of the real artwork rather than
+    taken from the spec (which said 8 / 16 across the board):
+      pill / nav item   8   — sidebar active item
+      button, input    10   — "Publish Product", every form field
+      card             12   — every panel on all three screens
+  */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 20px;
+  --radius-4xl: 24px;
+  --radius-pill: 8px;
+
+  /*
+    Elevation. The spec described three symmetric ambient shadows; the artwork
+    is not symmetric — a card's top edge fades within 1px while its bottom edge
+    starts at ~16% black and fades over 3px. These reproduce that measured
+    falloff, so cards sit on the canvas the way the design shows.
+  */
+  --shadow-ambient-1: 0 1px 2px rgb(16 24 40 / 0.05);
+  --shadow-ambient-3:
+    0 1px 3px rgb(16 24 40 / 0.1), 0 1px 2px rgb(16 24 40 / 0.06);
+  --shadow-ambient-6:
+    0 6px 16px rgb(16 24 40 / 0.1), 0 2px 4px rgb(16 24 40 / 0.06);
+
+  /* ---- Shell metrics, measured off every screen (they agree exactly) ---- */
+  --spacing-sidebar: 260px;
+  --spacing-topbar: 96px;
+
+  /* Recharts series colours — the report chart is single-series ocean green */
+  --color-chart-1: #4ea674;
+  --color-chart-2: #6467f2;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --background: var(--color-canvas);
+  --foreground: var(--color-cyprus);
+
+  --card: var(--color-surface);
+  --card-foreground: var(--color-cyprus);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-cyprus);
+
+  /* Ocean Green is the brand primary — CTAs, active nav, focus rings */
+  --primary: var(--color-ocean-green);
+  --primary-foreground: #ffffff;
+
+  --secondary: var(--color-aqua-spring);
+  --secondary-foreground: var(--color-cyprus);
+
+  --muted: var(--color-canvas);
+  --muted-foreground: var(--color-grey);
+
+  --accent: var(--color-aqua-spring);
+  --accent-foreground: var(--color-cyprus);
+
+  --destructive: var(--color-error);
+
+  --border: var(--color-hairline);
+
+  /*
+    Fields in this kit are filled and borderless at rest, so shadcn's `--input`
+    (which it uses as the input *border* colour) is set to the same value as
+    the fill. `bg-input` and `border-input` therefore agree, and a field reads
+    as one flat surface until it takes the ocean-green focus ring.
+  */
+  --input: var(--color-canvas);
+  --ring: var(--color-ocean-green);
+
+  --radius: 10px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /*
+      Body: 16 / 140%, per the type scale.
+
+      The scale calls this weight "Medium", but Lato ships 100/300/400/700/900
+      on Google Fonts — there is no 500. Requesting 500 makes the browser
+      synthesise a faux weight that reads heavier and blurrier than Lato
+      Regular, so every "Medium" in the scale maps to 400 here and only Bold
+      styles use 700.
+    */
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  html {
+    @apply font-sans;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility text-title {
+  /* Title for Dashboard — Bold 18 at -2% tracking. Topbar and card titles. */
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+@utility text-section {
+  /*
+    Title / Body Large, 22px — the "Basic Details" / "Pricing" / "Inventory"
+    headings. The type sheet marks this Medium, but the Add Product artwork
+    draws it Bold, so it is Bold here.
+  */
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+@utility text-caption {
+  /* Derived caption — the sub-16px text used for table heads and helper copy */
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+@utility scrollbar-thin {
+  /* The scrollable regions in the design show a thin, low-contrast bar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hairline) transparent;
 }
