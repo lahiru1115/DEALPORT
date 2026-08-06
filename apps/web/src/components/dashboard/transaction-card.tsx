@@ -55,21 +55,31 @@ export function TransactionCard({ transactions }: { transactions: Transaction[] 
           </TableRow>
         </TableHeader>
         <TableBody>
-          {transactions.map((transaction, index) => (
-            <TableRow key={transaction.id}>
-              <TableCell className="text-grey">{index + 1}.</TableCell>
-              <TableCell className="text-cyprus">{transaction.reference}</TableCell>
-              <TableCell className="text-cyprus">{formatOrderDate(transaction.placedAt)}</TableCell>
-              <TableCell>
-                <StatusPill tone={STATUS_TONE[transaction.status]}>
-                  {STATUS_LABEL[transaction.status]}
-                </StatusPill>
-              </TableCell>
-              <TableCell className="text-right font-bold text-cyprus">
-                ${transaction.amount}
+          {transactions.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="py-8 text-center text-grey">
+                No transactions yet.
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            transactions.map((transaction, index) => (
+              <TableRow key={transaction.id}>
+                <TableCell className="text-grey">{index + 1}.</TableCell>
+                <TableCell className="text-cyprus">{transaction.reference}</TableCell>
+                <TableCell className="text-cyprus">
+                  {formatOrderDate(transaction.placedAt)}
+                </TableCell>
+                <TableCell>
+                  <StatusPill tone={STATUS_TONE[transaction.status]}>
+                    {STATUS_LABEL[transaction.status]}
+                  </StatusPill>
+                </TableCell>
+                <TableCell className="text-right font-bold text-cyprus">
+                  ${transaction.amount}
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </Card>

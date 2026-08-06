@@ -35,7 +35,10 @@ export function AddNewProductCard({ categories }: { categories: Category[] }) {
 
       <p className="text-caption mb-2 text-grey">Categories</p>
       <div className="mb-3 space-y-2.5">
-        {categories.slice(0, 3).map((category) => (
+        {categories.length === 0 ? (
+          <p className="text-caption py-2 text-grey">No categories yet.</p>
+        ) : (
+          categories.slice(0, 3).map((category) => (
           <Link
             key={category.id}
             href={`/products?categoryId=${category.id}`}
@@ -54,10 +57,11 @@ export function AddNewProductCard({ categories }: { categories: Category[] }) {
                 <ImageOutlineIcon className="size-4 text-grey" />
               )}
             </div>
-            <span className="flex-1 truncate text-base text-cyprus">{category.name}</span>
-            <ChevronRightIcon className="size-4 shrink-0 text-grey" />
-          </Link>
-        ))}
+              <span className="flex-1 truncate text-base text-cyprus">{category.name}</span>
+              <ChevronRightIcon className="size-4 shrink-0 text-grey" />
+            </Link>
+          ))
+        )}
       </div>
 
       <div className="mb-5 flex justify-center">

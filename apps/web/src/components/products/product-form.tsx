@@ -499,9 +499,19 @@ export function ProductForm({ product }: { product?: Product }) {
                   control={control}
                   name="categoryId"
                   render={({ field }) => (
-                    <Select value={field.value ?? ""} onValueChange={field.onChange}>
+                    <Select
+                      value={field.value ?? ""}
+                      onValueChange={field.onChange}
+                      disabled={categoriesQuery.isError}
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select your product" />
+                        <SelectValue
+                          placeholder={
+                            categoriesQuery.isError
+                              ? "Couldn't load categories"
+                              : "Select your product"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {(categoriesQuery.data?.data ?? []).map((category) => (
@@ -514,6 +524,18 @@ export function ProductForm({ product }: { product?: Product }) {
                   )}
                 />
                 <FieldError message={errors.categoryId?.message} />
+                {categoriesQuery.isError ? (
+                  <p className="text-caption mt-1.5 text-error">
+                    Couldn&apos;t load categories.{" "}
+                    <button
+                      type="button"
+                      onClick={() => categoriesQuery.refetch()}
+                      className="font-bold underline"
+                    >
+                      Retry
+                    </button>
+                  </p>
+                ) : null}
               </div>
 
               <div>
@@ -529,6 +551,9 @@ export function ProductForm({ product }: { product?: Product }) {
                     />
                   )}
                 />
+                {tagsQuery.isError ? (
+                  <p className="text-caption mt-1.5 text-error">Couldn&apos;t load tags.</p>
+                ) : null}
               </div>
 
               <div>

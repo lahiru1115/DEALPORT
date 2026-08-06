@@ -56,38 +56,46 @@ export function BestSellingCard({ products }: { products: WidgetProduct[] }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {products.map((product) => {
-            const image = product.images[0];
-            return (
-              <TableRow key={product.id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-md border border-hairline bg-canvas">
-                      {image ? (
-                        <Image
-                          src={image.url}
-                          alt={product.name}
-                          width={40}
-                          height={40}
-                          className="size-full object-cover"
-                        />
-                      ) : (
-                        <ImageOutlineIcon className="size-4 text-grey" />
-                      )}
+          {products.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={4} className="py-8 text-center text-grey">
+                No sales yet.
+              </TableCell>
+            </TableRow>
+          ) : (
+            products.map((product) => {
+              const image = product.images[0];
+              return (
+                <TableRow key={product.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-md border border-hairline bg-canvas">
+                        {image ? (
+                          <Image
+                            src={image.url}
+                            alt={product.name}
+                            width={40}
+                            height={40}
+                            className="size-full object-cover"
+                          />
+                        ) : (
+                          <ImageOutlineIcon className="size-4 text-grey" />
+                        )}
+                      </div>
+                      <span className="text-cyprus">{product.name}</span>
                     </div>
-                    <span className="text-cyprus">{product.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-cyprus">{product.totalOrders}</TableCell>
-                <TableCell>
-                  <StockWord inStock={product.stockStatus !== "OUT_OF_STOCK"} />
-                </TableCell>
-                <TableCell className="text-right font-bold text-cyprus">
-                  ${product.price}
-                </TableCell>
-              </TableRow>
-            );
-          })}
+                  </TableCell>
+                  <TableCell className="text-cyprus">{product.totalOrders}</TableCell>
+                  <TableCell>
+                    <StockWord inStock={product.stockStatus !== "OUT_OF_STOCK"} />
+                  </TableCell>
+                  <TableCell className="text-right font-bold text-cyprus">
+                    ${product.price}
+                  </TableCell>
+                </TableRow>
+              );
+            })
+          )}
         </TableBody>
       </Table>
 

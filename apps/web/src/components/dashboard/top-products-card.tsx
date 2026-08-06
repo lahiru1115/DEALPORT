@@ -39,7 +39,9 @@ export function TopProductsCard({ products }: { products: WidgetProduct[] }) {
 
       <div className="flex-1 divide-y divide-hairline">
         {filtered.length === 0 ? (
-          <p className="text-caption py-6 text-center text-grey">No products match.</p>
+          <p className="text-caption py-6 text-center text-grey">
+            {products.length === 0 ? "No published products yet." : "No products match."}
+          </p>
         ) : (
           filtered.map((product) => {
             const image = product.images[0];
