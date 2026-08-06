@@ -155,7 +155,14 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    /*
+      `font-sans` goes on `body`, not `html`: `--font-lato` is scoped to the
+      class next/font puts on `<body>` (see app/layout.tsx), and custom
+      properties don't inherit upward — `font-sans` on `html` would resolve
+      an undefined variable and silently fall back to the browser default
+      font instead of Lato.
+    */
+    @apply bg-background font-sans text-foreground;
     /*
       Body: 16 / 140%, per the type scale.
 
@@ -168,10 +175,6 @@
     font-size: 16px;
     font-weight: 400;
     line-height: 1.4;
-  }
-
-  html {
-    @apply font-sans;
   }
 }
 
