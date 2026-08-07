@@ -49,7 +49,19 @@ export function LiveUsersCard() {
         </ResponsiveContainer>
       </div>
 
-      <div className="relative flex-1 overflow-hidden rounded-lg">
+      {/* Outside the map, not layered over it — measured off `2 Dashboard.png`. */}
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-base font-bold text-cyprus">Sales by Country</p>
+        <p className="text-caption text-grey">Sales</p>
+      </div>
+
+      {/*
+        `-mx-6` cancels the card's own `p-6` so the map reaches the card's
+        left/right edges — the design bleeds it full-width. Only the image
+        bleeds, though: the row content below gets that same 24px back via
+        `px-6`, so flags/numbers/bars stay aligned with the header above.
+      */}
+      <div className="relative -mx-6 flex-1 overflow-hidden">
         <Image
           src="/brand/world-map.svg"
           alt=""
@@ -58,12 +70,7 @@ export function LiveUsersCard() {
           className="object-cover opacity-40"
         />
 
-        <div className="relative flex flex-col gap-4 p-1">
-          <div className="flex items-center justify-between">
-            <p className="text-base font-bold text-cyprus">Sales by Country</p>
-            <p className="text-caption text-grey">Sales</p>
-          </div>
-
+        <div className="relative flex flex-col gap-4 px-6 py-1">
           {COUNTRY_SALES.map((country) => {
             const positive = country.deltaPct >= 0;
             return (
