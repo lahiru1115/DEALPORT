@@ -97,7 +97,7 @@ export function ReportCard({ initialReport }: { initialReport: DashboardReport }
         </div>
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-8 border-b border-hairline pb-4">
+      <div className="mb-6 grid grid-cols-5 border-b border-hairline pb-4">
         {SUMMARY_FIELDS.map((field, index) => (
           <div key={field.key} className={cn("pb-3", index === 0 && "border-b-2 border-primary")}>
             <p className="text-[28px] font-bold text-cyprus">
