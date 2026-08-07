@@ -55,6 +55,19 @@ function toDateInput(value: string | null): string | undefined {
   return value.slice(0, 10);
 }
 
+/**
+ * Strips everything but digits and a single "." as the user types, rather
+ * than only flagging it after the fact via `priceField`'s zod validation —
+ * price and discounted price shouldn't accept letters or a second decimal
+ * point in the first place.
+ */
+function sanitizeDecimalInput(value: string): string {
+  const cleaned = value.replace(/[^0-9.]/g, "");
+  const firstDot = cleaned.indexOf(".");
+  if (firstDot === -1) return cleaned;
+  return cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replaceAll(".", "");
+}
+
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return <p className="text-caption mt-1.5 text-error">{message}</p>;
@@ -128,6 +141,13 @@ export function ProductForm({ product }: { product?: Product }) {
           images: [],
         },
   });
+
+  // Bound once so the sanitizing `onChange` below can call RHF's own
+  // onChange itself, after mutating the DOM value — not through register's
+  // own `onChange` option, which runs too late: RHF already reads
+  // `event.target.value` into form state before that callback fires.
+  const priceField = register("price");
+  const discountedPriceField = register("discountedPrice");
 
   const unlimitedStock = watch("unlimitedStock");
   const price = Number(watch("price"));
@@ -292,7 +312,11 @@ export function ProductForm({ product }: { product?: Product }) {
                     placeholder="999.89"
                     className="pr-24"
                     aria-invalid={Boolean(errors.price)}
-                    {...register("price")}
+                    {...priceField}
+                    onChange={(event) => {
+                      event.target.value = sanitizeDecimalInput(event.target.value);
+                      priceField.onChange(event);
+                    }}
                   />
                   {/*
                     USD is the only currency the API models (`currency` defaults
@@ -321,7 +345,11 @@ export function ProductForm({ product }: { product?: Product }) {
                       placeholder="99"
                       className={cn("pl-12", saleAmount && "pr-32")}
                       aria-invalid={Boolean(errors.discountedPrice)}
-                      {...register("discountedPrice")}
+                      {...discountedPriceField}
+                      onChange={(event) => {
+                        event.target.value = sanitizeDecimalInput(event.target.value);
+                        discountedPriceField.onChange(event);
+                      }}
                     />
                     {saleAmount ? (
                       <span className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-base font-bold text-cyprus">
