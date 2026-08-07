@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,7 +37,7 @@ import { api } from "@/lib/api/client";
 import { isApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
 
-import { ImageUploader } from "./image-uploader";
+import { ImageUploader, type ImageUploaderHandle } from "./image-uploader";
 import { TagSelect } from "./tag-select";
 
 /** The five swatches in the kit's "Select your color" row, sampled at 2x. */
@@ -67,6 +68,8 @@ export function ProductForm({ product }: { product?: Product }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const isEdit = Boolean(product);
+  const imageUploaderRef = useRef<ImageUploaderHandle>(null);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
@@ -83,6 +86,7 @@ export function ProductForm({ product }: { product?: Product }) {
     control,
     watch,
     setValue,
+    trigger,
     formState: { errors, isSubmitting },
   } = useForm<CreateProductInput, unknown, CreateProductPayload>({
     resolver: zodResolver(createProductSchema),
@@ -164,11 +168,33 @@ export function ProductForm({ product }: { product?: Product }) {
   /*
     "Publish Product" and "Save to draft" are the same submit through the same
     validation — they differ only in the `status` they post (plans/02-API.md §3).
-  */
-  const submitAs = (status: ProductStatus) =>
-    handleSubmit((values) => mutation.mutate({ ...values, status }));
 
-  const pending = isSubmitting || mutation.isPending;
+    Any staged images are uploaded to Cloudinary here, right before the save,
+    rather than the moment they're picked — see the note on `ImageUploader`.
+    Validated first, so an otherwise-invalid form (missing name, bad price,
+    etc.) never triggers an upload for a product that isn't about to be
+    saved anyway; a failed upload itself aborts before `handleSubmit` runs.
+  */
+  const submitAs = (status: ProductStatus) => async (event?: React.BaseSyntheticEvent) => {
+    event?.preventDefault();
+    if (pending) return;
+
+    if (!(await trigger())) return;
+
+    setUploadingImages(true);
+    try {
+      await imageUploaderRef.current?.commitUploads();
+    } catch (error) {
+      toast.error(isApiError(error) ? error.message : "Image upload failed. Please try again.");
+      return;
+    } finally {
+      setUploadingImages(false);
+    }
+
+    await handleSubmit((values) => mutation.mutate({ ...values, status }))(event);
+  };
+
+  const pending = isSubmitting || mutation.isPending || uploadingImages;
 
   function toggleColor(color: string) {
     setValue(
@@ -482,6 +508,7 @@ export function ProductForm({ product }: { product?: Product }) {
               name="images"
               render={({ field }) => (
                 <ImageUploader
+                  ref={imageUploaderRef}
                   images={(field.value ?? []) as ProductImageInput[]}
                   onChange={field.onChange}
                 />

@@ -1,9 +1,11 @@
 /**
  * `POST /uploads/image` — see plans/02-API.md §5.
  *
- * Upload and product-save are separate calls on purpose: the Add Product screen
- * uploads immediately and holds the returned `url` in form state, so a product
- * save that fails validation never loses images the user already uploaded.
+ * Upload and product-save are separate calls, but the Add Product screen only
+ * fires this one at save time (right before "Publish Product" / "Save to
+ * draft"), not the moment a file is picked — see `ImageUploader` in
+ * `apps/web`. Uploading eagerly on pick left an orphaned Cloudinary asset
+ * behind every time someone chose an image and abandoned the page.
  */
 export interface UploadImageResult {
   url: string;

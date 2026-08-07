@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Image from "next/image";
 import { XIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -16,68 +16,142 @@ import {
   CirclePlusFilledIcon,
 } from "@/components/icons/generated";
 import { api } from "@/lib/api/client";
-import { isApiError } from "@/lib/api/errors";
 import { cn } from "@/lib/utils";
 
+type UploaderItem =
+  | { id: string; status: "uploaded"; url: string; publicId?: string; isPrimary: boolean }
+  | { id: string; status: "pending"; file: File; previewUrl: string; isPrimary: boolean };
+
+export interface ImageUploaderHandle {
+  /**
+   * Uploads every file staged since the last commit and returns the full,
+   * now-real image list. `ProductForm` calls this right before posting the
+   * product, not as each file is picked — see the note below.
+   */
+  commitUploads: () => Promise<ProductImageInput[]>;
+}
+
 /**
- * Uploads land on Cloudinary via `POST /uploads/image` the moment a file is
- * chosen, and only the returned URL is held in form state. A failed product
- * save therefore never loses an already-uploaded image (design system §7).
+ * Picking a file only stages it locally (an object-URL preview) — nothing
+ * reaches Cloudinary until `commitUploads` runs, which `ProductForm` calls
+ * immediately before "Publish Product" / "Save to draft". Uploading eagerly
+ * on pick — the previous behaviour — left an orphaned Cloudinary asset behind
+ * every time someone picked an image and then abandoned the page without
+ * saving. A file removed before commit is simply discarded; it was never
+ * uploaded, so there's nothing on the server to clean up.
  */
-export function ImageUploader({
-  images,
-  onChange,
-}: {
-  images: ProductImageInput[];
-  onChange: (images: ProductImageInput[]) => void;
-}) {
-  const [uploading, setUploading] = useState(false);
+export const ImageUploader = forwardRef<
+  ImageUploaderHandle,
+  {
+    images: ProductImageInput[];
+    onChange: (images: ProductImageInput[]) => void;
+  }
+>(function ImageUploader({ images, onChange }, ref) {
+  // Seeded once from the current field value; from here on the component
+  // owns the list itself and only reports back to the form on commit.
+  const [items, setItems] = useState<UploaderItem[]>(() =>
+    images.map((image, index) => ({
+      id: `existing-${index}`,
+      status: "uploaded",
+      url: image.url,
+      publicId: image.publicId,
+      isPrimary: Boolean(image.isPrimary),
+    })),
+  );
+  const [committing, setCommitting] = useState(false);
   const addInputRef = useRef<HTMLInputElement>(null);
   const replaceInputRef = useRef<HTMLInputElement>(null);
+  const nextId = useRef(0);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
 
-  const primary = images.find((image) => image.isPrimary) ?? images[0];
+  // Pending previews are object URLs — revoke whatever's left on unmount so
+  // an abandoned page doesn't keep blobs alive for the tab's lifetime.
+  useEffect(() => {
+    return () => {
+      for (const item of itemsRef.current) {
+        if (item.status === "pending") URL.revokeObjectURL(item.previewUrl);
+      }
+    };
+  }, []);
 
-  async function upload(file: File, mode: "add" | "replace") {
+  useImperativeHandle(ref, () => ({
+    async commitUploads() {
+      setCommitting(true);
+      try {
+        let current = itemsRef.current;
+        for (const item of itemsRef.current) {
+          if (item.status !== "pending") continue;
+          const result = await api.uploads.image(item.file);
+          URL.revokeObjectURL(item.previewUrl);
+          current = current.map((entry) =>
+            entry.id === item.id
+              ? {
+                  id: entry.id,
+                  status: "uploaded" as const,
+                  url: result.url,
+                  publicId: result.publicId,
+                  isPrimary: entry.isPrimary,
+                }
+              : entry,
+          );
+          setItems(current);
+        }
+
+        const resolved: ProductImageInput[] = current.map((entry) => ({
+          url: entry.status === "uploaded" ? entry.url : entry.previewUrl,
+          publicId: entry.status === "uploaded" ? entry.publicId : undefined,
+          isPrimary: entry.isPrimary,
+        }));
+        onChange(resolved);
+        return resolved;
+      } finally {
+        setCommitting(false);
+      }
+    },
+  }));
+
+  const primary = items.find((item) => item.isPrimary) ?? items[0];
+
+  function stage(file: File, mode: "add" | "replace") {
     const problem = validateUploadFile(file);
     if (problem) {
       toast.error(problem);
       return;
     }
 
-    setUploading(true);
-    try {
-      const result = await api.uploads.image(file);
-      const uploaded: ProductImageInput = {
-        url: result.url,
-        publicId: result.publicId,
-        isPrimary: mode === "replace" || images.length === 0,
-      };
+    const item: UploaderItem = {
+      id: `new-${nextId.current++}`,
+      status: "pending",
+      file,
+      previewUrl: URL.createObjectURL(file),
+      isPrimary: mode === "replace" || items.length === 0,
+    };
 
-      if (mode === "replace") {
-        // The new file becomes primary; the old primary stays as a secondary
-        // rather than being discarded, since it is already uploaded.
-        onChange([
-          uploaded,
-          ...images.map((image) => ({ ...image, isPrimary: false })),
-        ]);
-      } else {
-        onChange([...images, uploaded]);
-      }
-    } catch (error) {
-      toast.error(isApiError(error) ? error.message : "Upload failed. Please try again.");
-    } finally {
-      setUploading(false);
+    if (mode === "replace") {
+      // The new file becomes primary; the old primary stays as a secondary
+      // rather than being discarded.
+      setItems([item, ...items.map((existing) => ({ ...existing, isPrimary: false }))]);
+    } else {
+      setItems([...items, item]);
     }
   }
 
-  function handleRemove(index: number) {
-    const next = images.filter((_, i) => i !== index);
+  function handleRemove(id: string) {
+    const target = items.find((item) => item.id === id);
+    if (target?.status === "pending") URL.revokeObjectURL(target.previewUrl);
+
+    const next = items.filter((item) => item.id !== id);
     // Removing the primary promotes the next image, so a product never ends up
     // with images but no primary.
-    if (next.length > 0 && !next.some((image) => image.isPrimary)) {
+    if (next.length > 0 && !next.some((item) => item.isPrimary)) {
       next[0] = { ...next[0], isPrimary: true };
     }
-    onChange(next);
+    setItems(next);
+  }
+
+  function srcFor(item: UploaderItem) {
+    return item.status === "uploaded" ? item.url : item.previewUrl;
   }
 
   return (
@@ -89,7 +163,7 @@ export function ImageUploader({
         className="sr-only"
         onChange={(event) => {
           const file = event.target.files?.[0];
-          if (file) void upload(file, "add");
+          if (file) stage(file, "add");
           event.target.value = "";
         }}
       />
@@ -100,7 +174,7 @@ export function ImageUploader({
         className="sr-only"
         onChange={(event) => {
           const file = event.target.files?.[0];
-          if (file) void upload(file, "replace");
+          if (file) stage(file, "replace");
           event.target.value = "";
         }}
       />
@@ -110,10 +184,11 @@ export function ImageUploader({
         <div className="relative grid min-h-72 place-items-center rounded-xl border border-hairline p-5">
           {primary ? (
             <Image
-              src={primary.url}
+              src={srcFor(primary)}
               alt="Product preview"
               width={280}
               height={280}
+              unoptimized={primary.status === "pending"}
               className="max-h-60 w-auto object-contain"
             />
           ) : (
@@ -126,7 +201,7 @@ export function ImageUploader({
           <div className="absolute inset-x-5 bottom-5 flex items-center justify-between">
             <button
               type="button"
-              disabled={uploading}
+              disabled={committing}
               onClick={() => addInputRef.current?.click()}
               className="flex h-11 items-center gap-2 rounded-lg border border-hairline bg-white px-4 text-base text-cyprus shadow-ambient-1 transition-colors hover:bg-accent disabled:opacity-50"
             >
@@ -136,7 +211,7 @@ export function ImageUploader({
             {primary ? (
               <button
                 type="button"
-                disabled={uploading}
+                disabled={committing}
                 onClick={() => replaceInputRef.current?.click()}
                 className="flex h-11 items-center gap-2 rounded-lg border border-hairline bg-white px-4 text-base text-cyprus shadow-ambient-1 transition-colors hover:bg-accent disabled:opacity-50"
               >
@@ -149,26 +224,28 @@ export function ImageUploader({
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        {images.map((image, index) => (
+        {items.map((item, index) => (
           <div
-            key={`${image.url}-${index}`}
+            key={item.id}
             className={cn(
               "relative aspect-square overflow-hidden rounded-xl border bg-white",
-              image.isPrimary ? "border-primary" : "border-hairline",
+              item.isPrimary ? "border-primary" : "border-hairline",
             )}
           >
             <Image
-              src={image.url}
+              src={srcFor(item)}
               alt={`Product image ${index + 1}`}
               fill
               sizes="160px"
+              unoptimized={item.status === "pending"}
               className="object-contain p-3"
             />
             <button
               type="button"
               aria-label={`Remove image ${index + 1}`}
-              onClick={() => handleRemove(index)}
-              className="absolute top-1.5 right-1.5 grid size-6 place-items-center rounded-full bg-white/90 text-grey shadow-ambient-1 transition-colors hover:text-error"
+              disabled={committing}
+              onClick={() => handleRemove(item.id)}
+              className="absolute top-1.5 right-1.5 grid size-6 place-items-center rounded-full bg-white/90 text-grey shadow-ambient-1 transition-colors hover:text-error disabled:opacity-50"
             >
               <XIcon className="size-3.5" />
             </button>
@@ -177,16 +254,16 @@ export function ImageUploader({
 
         <button
           type="button"
-          disabled={uploading}
+          disabled={committing}
           onClick={() => addInputRef.current?.click()}
           className="grid aspect-square place-items-center rounded-xl border border-dashed border-primary/50 text-primary transition-colors hover:bg-accent disabled:opacity-50"
         >
           <span className="flex flex-col items-center gap-1.5">
             <CirclePlusFilledIcon className="size-6" />
-            <span className="text-caption">{uploading ? "Uploading…" : "Add Image"}</span>
+            <span className="text-caption">{committing ? "Uploading…" : "Add Image"}</span>
           </span>
         </button>
       </div>
     </div>
   );
-}
+});
