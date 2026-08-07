@@ -34,7 +34,7 @@ export function TagSelect({
     <Popover>
       <PopoverTrigger
         className={cn(
-          "flex h-12 w-full items-center justify-between gap-2 rounded-lg border border-input bg-input py-2 pr-3 pl-4 text-base transition-colors outline-none",
+          "flex h-12 w-full items-center justify-between gap-2 rounded-lg border border-field-border bg-input py-2 pr-3 pl-4 text-base transition-colors outline-none",
           "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/25",
           selected.length === 0 && "text-muted-foreground",
         )}

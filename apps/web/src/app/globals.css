@@ -50,6 +50,15 @@
   --color-surface: #ffffff;
   --color-hairline: #ecedee;
 
+  /*
+    Input/select/textarea border — a genuinely separate colour from the fill,
+    confirmed by scanline probes on two unrelated fields (05-MEASURED-SPEC.md
+    §8). Kept distinct from `--color-hairline` (#ECEDEE, sampled off card
+    borders) even though the two are close — different element, different
+    sample, no reason to assume they're meant to match.
+  */
+  --color-field-border: #e5e7eb;
+
   /* ---- Type ---- */
   --font-sans: var(--font-lato), ui-sans-serif, system-ui, sans-serif;
 
@@ -139,10 +148,12 @@
   --border: var(--color-hairline);
 
   /*
-    Fields in this kit are filled and borderless at rest, so shadcn's `--input`
-    (which it uses as the input *border* colour) is set to the same value as
-    the fill. `bg-input` and `border-input` therefore agree, and a field reads
-    as one flat surface until it takes the ocean-green focus ring.
+    Fill only. `--input` feeds `--color-input` (see `@theme inline` above),
+    and Tailwind derives *both* `bg-input` and `border-input` from that one
+    variable — they can't be given different values through this token. The
+    field components deliberately don't use `border-input`; they use
+    `border-field-border` (`--color-field-border` in `@theme`, measured
+    separately) so the border can actually differ from the fill.
   */
   --input: var(--color-canvas);
   --ring: var(--color-ocean-green);

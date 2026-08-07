@@ -32,7 +32,7 @@ export function TopProductsCard({ products }: { products: WidgetProduct[] }) {
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           placeholder="Search"
-          className="h-11 w-full rounded-lg bg-input pr-10 pl-4 text-base text-cyprus placeholder:text-grey focus-visible:ring-3 focus-visible:ring-ring/25 focus-visible:outline-none"
+          className="h-11 w-full rounded-lg border border-field-border bg-input pr-10 pl-4 text-base text-cyprus placeholder:text-grey focus-visible:ring-3 focus-visible:ring-ring/25 focus-visible:outline-none"
         />
         <SearchIcon className="absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-grey" />
       </div>

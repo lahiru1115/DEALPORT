@@ -39,7 +39,7 @@ export function Topbar({ user }: { user: AuthUser }) {
           <input
             type="search"
             placeholder="Search data, users, or reports"
-            className="h-12 w-full rounded-lg bg-input px-4 pr-11 text-base text-cyprus placeholder:text-grey focus-visible:ring-3 focus-visible:ring-ring/25 focus-visible:outline-none"
+            className="h-12 w-full rounded-lg border border-field-border bg-input px-4 pr-11 text-base text-cyprus placeholder:text-grey focus-visible:ring-3 focus-visible:ring-ring/25 focus-visible:outline-none"
           />
           <SearchIcon className="absolute top-1/2 right-4 size-5 -translate-y-1/2 text-grey" />
         </div>
