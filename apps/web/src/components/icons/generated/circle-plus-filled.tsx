@@ -1,8 +1,8 @@
-// Generated from design/icons/plus-circle-filled.svg — do not edit by hand.
+// Generated from design/icons/circle-plus-filled.svg — do not edit by hand.
 // Run `npm run icons:generate -w @dealport/web` to regenerate.
 import type { SVGProps } from "react";
 
-export function PlusCircleFilledIcon(props: SVGProps<SVGSVGElement>) {
+export function CirclePlusFilledIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       viewBox="0 0 20 20"

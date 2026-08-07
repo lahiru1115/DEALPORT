@@ -13,7 +13,7 @@ import {
 import {
   ArrowRefreshIcon,
   ImageOutlineIcon,
-  PlusCircleFilledIcon,
+  CirclePlusFilledIcon,
 } from "@/components/icons/generated";
 import { api } from "@/lib/api/client";
 import { isApiError } from "@/lib/api/errors";
@@ -182,7 +182,7 @@ export function ImageUploader({
           className="grid aspect-square place-items-center rounded-xl border border-dashed border-primary/50 text-primary transition-colors hover:bg-accent disabled:opacity-50"
         >
           <span className="flex flex-col items-center gap-1.5">
-            <PlusCircleFilledIcon className="size-6" />
+            <CirclePlusFilledIcon className="size-6" />
             <span className="text-caption">{uploading ? "Uploading…" : "Add Image"}</span>
           </span>
         </button>

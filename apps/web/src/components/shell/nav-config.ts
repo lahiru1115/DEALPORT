@@ -3,11 +3,14 @@ import type { ComponentType, SVGProps } from "react";
 import {
   CardOutlineIcon,
   CartOutlineIcon,
-  CirclePlusIcon,
+  CirclePlusOutlineIcon,
   CircleSquareOutlineIcon,
   GearOutlineIcon,
+  HomeFilledIcon,
   HomeOutlineIcon,
   ImageOutlineIcon,
+  CirclePlusFilledIcon,
+  ProductListFilledIcon,
   ProductListOutlineIcon,
   ReviewsOutlineIcon,
   StarOutlineIcon,
@@ -21,6 +24,8 @@ export type NavIcon = ComponentType<SVGProps<SVGSVGElement>>;
 export interface NavItem {
   label: string;
   icon: NavIcon;
+  /** Swapped in for `icon` while this row is the active route — falls back to `icon` when omitted. */
+  activeIcon?: NavIcon;
   /** Only the three routes the brief (§5) requires to actually navigate. */
   href?: string;
 }
@@ -40,7 +45,12 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Main menu",
     items: [
-      { label: "Dashboard", icon: HomeOutlineIcon, href: "/dashboard" },
+      {
+        label: "Dashboard",
+        icon: HomeOutlineIcon,
+        activeIcon: HomeFilledIcon,
+        href: "/dashboard",
+      },
       { label: "Order Management", icon: CartOutlineIcon },
       { label: "Customers", icon: UsersOutlineIcon },
       { label: "Coupon Code", icon: TicketCouponOutlineIcon },
@@ -52,9 +62,19 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Product",
     items: [
-      { label: "Add Products", icon: CirclePlusIcon, href: "/products/new" },
+      {
+        label: "Add Products",
+        icon: CirclePlusOutlineIcon,
+        activeIcon: CirclePlusFilledIcon,
+        href: "/products/new",
+      },
       { label: "Product Media", icon: ImageOutlineIcon },
-      { label: "Product List", icon: ProductListOutlineIcon, href: "/products" },
+      {
+        label: "Product List",
+        icon: ProductListOutlineIcon,
+        activeIcon: ProductListFilledIcon,
+        href: "/products",
+      },
       { label: "Product Reviews", icon: ReviewsOutlineIcon },
     ],
   },

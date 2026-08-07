@@ -15,7 +15,7 @@ import type {
   StockStatus,
 } from "@dealport/shared";
 
-import { CirclePlusIcon } from "@/components/icons/generated";
+import { CirclePlusOutlineIcon } from "@/components/icons/generated";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Pagination } from "@/components/ui/pagination";
@@ -193,7 +193,7 @@ export function ProductList() {
         <h2 className="text-section text-cyprus">Product List</h2>
         <Button asChild>
           <Link href="/products/new">
-            <CirclePlusIcon className="size-5" />
+            <CirclePlusOutlineIcon className="size-5" />
             Add Product
           </Link>
         </Button>

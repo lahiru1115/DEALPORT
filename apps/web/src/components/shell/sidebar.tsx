@@ -44,7 +44,7 @@ function NavRow({
   active: boolean;
   collapsed: boolean;
 }) {
-  const Icon = item.icon;
+  const Icon = active && item.activeIcon ? item.activeIcon : item.icon;
   const content = (
     <>
       <Icon className="size-5 shrink-0" />

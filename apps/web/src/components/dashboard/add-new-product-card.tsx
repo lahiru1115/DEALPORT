@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ChevronRightIcon } from "lucide-react";
 import type { Category } from "@dealport/shared";
 
-import { CirclePlusIcon, ImageOutlineIcon } from "@/components/icons/generated";
+import { CirclePlusOutlineIcon, ImageOutlineIcon } from "@/components/icons/generated";
 import { Card } from "@/components/ui/card";
 
 /**
@@ -28,7 +28,7 @@ export function AddNewProductCard({ categories }: { categories: Category[] }) {
           href="/products/new"
           className="flex items-center gap-1.5 text-caption font-bold text-indigo hover:underline"
         >
-          <CirclePlusIcon className="size-4" />
+          <CirclePlusOutlineIcon className="size-4" />
           Add New
         </Link>
       </div>
@@ -86,7 +86,7 @@ export function AddNewProductCard({ categories }: { categories: Category[] }) {
               aria-label={`Add ${product.name}`}
               className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-colors hover:bg-primary/90"
             >
-              <CirclePlusIcon className="size-4" />
+              <CirclePlusOutlineIcon className="size-4" />
             </Link>
           </div>
         ))}

@@ -1,8 +1,8 @@
-// Generated from design/icons/circle-plus.svg — do not edit by hand.
+// Generated from design/icons/circle-plus-outline.svg — do not edit by hand.
 // Run `npm run icons:generate -w @dealport/web` to regenerate.
 import type { SVGProps } from "react";
 
-export function CirclePlusIcon(props: SVGProps<SVGSVGElement>) {
+export function CirclePlusOutlineIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       viewBox="0 0 20 20"
