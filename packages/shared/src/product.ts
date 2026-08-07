@@ -173,16 +173,39 @@ const emptyToUndefined = (value: unknown) =>
 const hasAtMostTwoDecimals = (value: number) =>
   /^-?\d+(\.\d{1,2})?$/.test(String(value));
 
-const priceField = z.preprocess(
-  toNumeric,
-  z
-    .number({
-      required_error: "Product price is required",
-      invalid_type_error: "Enter a valid price",
-    })
-    .min(0, "Price cannot be negative")
-    .refine(hasAtMostTwoDecimals, "Use at most 2 decimal places"),
-);
+/**
+ * Required, unlike `optionalPriceField` below — deliberately built without
+ * `z.number({ required_error })`. A required primitive that gets `undefined`
+ * fails with Zod's own "invalid_type" issue, which — unlike a `.refine()`
+ * issue — marks the whole object schema *aborted* rather than merely
+ * *dirty*. `createProductSchema` adds its cross-field issues (the stock
+ * quantity rule below, the discount/sale-window rules) via `.superRefine()`,
+ * and Zod skips a `superRefine` entirely once the schema it's chained onto
+ * has aborted — so a blank price silently swallowed the stock quantity
+ * error until price was fixed first. Keeping this field's own "required"
+ * check soft (a `.superRefine()` issue, same mechanism as the stock
+ * quantity rule) keeps the object merely dirty, so every top-level issue
+ * surfaces together on the very first submit.
+ */
+const priceField = z
+  .preprocess(toNumeric, z.union([z.number(), z.string()]).optional())
+  .superRefine((value, ctx) => {
+    if (value === undefined) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Product price is required" });
+      return;
+    }
+    if (typeof value === "string") {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Enter a valid price" });
+      return;
+    }
+    if (value < 0) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Price cannot be negative" });
+      return;
+    }
+    if (!hasAtMostTwoDecimals(value)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Use at most 2 decimal places" });
+    }
+  });
 
 const optionalPriceField = z.preprocess(
   toNumeric,
@@ -273,12 +296,14 @@ type ProductFields = Partial<z.infer<typeof productBaseSchema>>;
  *
  * Both rules tolerate absent fields, mirroring the API's own guards: a patch
  * that sends only `discountedPrice` cannot be checked against a `price` it did
- * not send.
+ * not send. The `typeof` check similarly skips a `price` that failed its own
+ * "enter a valid price" check — `priceField`'s `superRefine` already flagged
+ * it, so this comparison isn't the right place to say more about it.
  */
 const addPriceAndSaleWindowIssues = (data: ProductFields, ctx: z.RefinementCtx) => {
   if (
     data.discountedPrice !== undefined &&
-    data.price !== undefined &&
+    typeof data.price === "number" &&
     data.discountedPrice >= data.price
   ) {
     ctx.addIssue({
@@ -302,23 +327,31 @@ const addPriceAndSaleWindowIssues = (data: ProductFields, ctx: z.RefinementCtx) 
 };
 
 /** `POST /products` */
-export const createProductSchema = productBaseSchema.superRefine((data, ctx) => {
-  addPriceAndSaleWindowIssues(data, ctx);
+export const createProductSchema = productBaseSchema
+  .superRefine((data, ctx) => {
+    addPriceAndSaleWindowIssues(data, ctx);
 
+    /*
+      Create-only, and deliberately not shared with the update schema.
+      `ProductsService.create()` asserts this; `ProductsService.update()` does
+      not — a PATCH that touches only the name must not be rejected for omitting
+      a stock quantity the product already has.
+    */
+    if (!data.unlimitedStock && data.stockQuantity === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["stockQuantity"],
+        message: "Stock quantity is required unless stock is unlimited",
+      });
+    }
+  })
   /*
-    Create-only, and deliberately not shared with the update schema.
-    `ProductsService.create()` asserts this; `ProductsService.update()` does
-    not — a PATCH that touches only the name must not be rejected for omitting
-    a stock quantity the product already has.
+    Narrows `price` back to a plain `number` for consumers. `priceField`'s own
+    type is deliberately wider (see the comment there) so its "required" check
+    can't abort the object before the `superRefine` above runs — by the time a
+    parse reaches this transform without issues, `price` is guaranteed numeric.
   */
-  if (!data.unlimitedStock && data.stockQuantity === undefined) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["stockQuantity"],
-      message: "Stock quantity is required unless stock is unlimited",
-    });
-  }
-});
+  .transform((data) => ({ ...data, price: data.price as number }));
 
 /**
  * `PATCH /products/:id`. Every field optional, same constraints — the mirror of
@@ -327,7 +360,8 @@ export const createProductSchema = productBaseSchema.superRefine((data, ctx) => 
  */
 export const updateProductSchema = productBaseSchema
   .partial()
-  .superRefine(addPriceAndSaleWindowIssues);
+  .superRefine(addPriceAndSaleWindowIssues)
+  .transform((data) => ({ ...data, price: data.price as number | undefined }));
 
 /** Input *before* defaults are applied — what a form is allowed to hand in. */
 export type CreateProductInput = z.input<typeof createProductSchema>;
