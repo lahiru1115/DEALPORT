@@ -347,9 +347,14 @@ export const createProductSchema = productBaseSchema
   })
   /*
     Narrows `price` back to a plain `number` for consumers. `priceField`'s own
-    type is deliberately wider (see the comment there) so its "required" check
-    can't abort the object before the `superRefine` above runs — by the time a
-    parse reaches this transform without issues, `price` is guaranteed numeric.
+    type is deliberately wider (`number | string`, see the comment there) so
+    its "required" check stays a soft `superRefine` issue instead of a hard
+    type-mismatch that would abort the whole object before the `superRefine`
+    above runs — which used to swallow the stock quantity issue whenever price
+    was also blank. This is safe to chain here (unlike inside `priceField`
+    itself): a `.transform()` nested inside a *field's own* `superRefine`
+    reintroduces that exact abort, but one chained onto the *object's own*
+    `superRefine`, after it has already run, does not.
   */
   .transform((data) => ({ ...data, price: data.price as number }));
 
@@ -361,7 +366,17 @@ export const createProductSchema = productBaseSchema
 export const updateProductSchema = productBaseSchema
   .partial()
   .superRefine(addPriceAndSaleWindowIssues)
-  .transform((data) => ({ ...data, price: data.price as number | undefined }));
+  /*
+    Same narrowing as `createProductSchema`, but `price` has to stay an
+    optional *key* here, not just a key whose value can be `undefined` — a
+    PATCH that omits price entirely (`{ images: [...] }`) must still satisfy
+    this type. Destructuring it out and only re-adding it when present (rather
+    than always spreading `price: data.price as number`) is what keeps the
+    key itself optional rather than merely undefined-valued.
+  */
+  .transform(({ price, ...rest }) =>
+    price === undefined ? rest : { ...rest, price: price as number },
+  );
 
 /** Input *before* defaults are applied — what a form is allowed to hand in. */
 export type CreateProductInput = z.input<typeof createProductSchema>;
