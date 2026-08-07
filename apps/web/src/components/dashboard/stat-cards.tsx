@@ -109,7 +109,14 @@ export function StatCards({ stats }: { stats: DashboardStats }) {
           <CardMenuButton />
         </div>
         <p className="text-caption mb-5 text-grey">Last 7 days</p>
-        <div className="mb-5 flex flex-1 items-start gap-6">
+        {/*
+          Grid, not flex — measured off `2 Dashboard.png`: "Pending" and
+          "Canceled" sit in two equal-width columns (the divider bisects the
+          card exactly), not two intrinsically-sized blocks that only happen
+          to line up. A flex row can't guarantee that once the numbers on
+          either side differ in width.
+        */}
+        <div className="relative mb-5 grid flex-1 grid-cols-2 items-start gap-6">
           <div>
             <p className="mb-2 text-base text-cyprus">Pending</p>
             <p className="text-[32px] font-bold text-cyprus">
@@ -119,7 +126,6 @@ export function StatCards({ stats }: { stats: DashboardStats }) {
               </span>
             </p>
           </div>
-          <div className="h-14 w-px shrink-0 self-center bg-hairline" />
           <div>
             <p className="mb-2 text-base text-cyprus">Canceled</p>
             <p className="flex items-baseline gap-2 text-[32px] font-bold text-error">
@@ -127,6 +133,7 @@ export function StatCards({ stats }: { stats: DashboardStats }) {
               <Delta pct={stats.canceled.deltaPct} />
             </p>
           </div>
+          <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-hairline" />
         </div>
         <div className="mt-auto flex justify-end">
           <DetailsButton />
