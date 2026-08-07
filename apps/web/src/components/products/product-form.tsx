@@ -68,6 +68,11 @@ function sanitizeDecimalInput(value: string): string {
   return cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replaceAll(".", "");
 }
 
+/** Digits only — stock quantity is a whole-number count, no decimal point. */
+function sanitizeIntegerInput(value: string): string {
+  return value.replace(/[^0-9]/g, "");
+}
+
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return <p className="text-caption mt-1.5 text-error">{message}</p>;
@@ -148,6 +153,7 @@ export function ProductForm({ product }: { product?: Product }) {
   // `event.target.value` into form state before that callback fires.
   const priceField = register("price");
   const discountedPriceField = register("discountedPrice");
+  const stockQuantityField = register("stockQuantity");
 
   const unlimitedStock = watch("unlimitedStock");
   const price = Number(watch("price"));
@@ -436,7 +442,11 @@ export function ProductForm({ product }: { product?: Product }) {
                     disabled={unlimitedStock}
                     placeholder={unlimitedStock ? "Unlimited" : "50"}
                     aria-invalid={Boolean(errors.stockQuantity)}
-                    {...register("stockQuantity")}
+                    {...stockQuantityField}
+                    onChange={(event) => {
+                      event.target.value = sanitizeIntegerInput(event.target.value);
+                      stockQuantityField.onChange(event);
+                    }}
                   />
                   <FieldError message={errors.stockQuantity?.message} />
                 </div>
