@@ -119,7 +119,7 @@ export function Sidebar({
             alt="DEALPORT"
             width={181}
             height={38}
-            className="h-5 w-auto"
+            className="h-7 w-auto"
           />
         )}
         <button
@@ -129,7 +129,10 @@ export function Sidebar({
           className="grid size-6 shrink-0 place-items-center text-grey transition-colors hover:text-cyprus"
         >
           <SidebarCollapseIcon
-            className={cn("size-4 transition-transform", collapsed && "rotate-180")}
+            className={cn(
+              "size-4 transition-transform duration-300 ease-in-out",
+              collapsed && "rotate-180",
+            )}
           />
         </button>
       </div>
