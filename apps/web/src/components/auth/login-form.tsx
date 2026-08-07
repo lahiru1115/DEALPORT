@@ -96,15 +96,6 @@ export function LoginForm() {
 
   return (
     <div className="space-y-5">
-      {formError ? (
-        <p
-          role="alert"
-          className="rounded-lg border border-error/20 bg-error/8 px-4 py-3 text-caption text-error"
-        >
-          {formError}
-        </p>
-      ) : null}
-
       <form onSubmit={handleSubmit(performLogin)} noValidate className="space-y-5">
         <div className="space-y-2">
           <Label htmlFor="email" className="font-bold text-cyprus">
@@ -165,6 +156,15 @@ export function LoginForm() {
             </p>
           ) : null}
         </div>
+
+        {formError ? (
+          <p
+            role="alert"
+            className="rounded-lg border border-error/20 bg-error/8 px-4 py-3 text-caption text-error"
+          >
+            {formError}
+          </p>
+        ) : null}
 
         <Button type="submit" disabled={busy} className="w-full">
           {isSubmitting ? (
