@@ -141,7 +141,9 @@ export function ProductFilters({
             <p className="text-caption font-bold text-cyprus">Category</p>
             <Select
               value={categoryId ?? "all"}
-              onValueChange={(value) => onCategoryChange(value === "all" ? undefined : value)}
+              onValueChange={(value) =>
+                onCategoryChange(value === "all" || value == null ? undefined : value)
+              }
             >
               <SelectTrigger size="sm">
                 <SelectValue placeholder="All categories" />
