@@ -12,6 +12,11 @@ const MAX_BYTES = 5 * 1024 * 1024;
 const ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const CLOUDINARY_FOLDER = 'dealport/products';
 
+// Prisma's `cuid()` default — matches the `Product.id` format exactly. This
+// is checked because `productId` becomes a Cloudinary folder segment, and it
+// arrives as a plain client-supplied string.
+const PRODUCT_ID_PATTERN = /^[a-z0-9]{20,32}$/;
+
 export interface UploadImageResult {
   url: string;
   publicId: string;
@@ -38,7 +43,7 @@ export class UploadsService {
     }
   }
 
-  async uploadImage(file?: Express.Multer.File): Promise<UploadImageResult> {
+  async uploadImage(file?: Express.Multer.File, productId?: string): Promise<UploadImageResult> {
     if (!this.configured) {
       throw new NotImplementedException(
         'Image upload is not configured on this environment — set CLOUDINARY_CLOUD_NAME, ' +
@@ -58,8 +63,12 @@ export class UploadsService {
         `Unsupported image type "${file.mimetype}" — accepted: ${ACCEPTED_MIME_TYPES.join(', ')}`,
       );
     }
+    if (productId !== undefined && !PRODUCT_ID_PATTERN.test(productId)) {
+      throw new UnprocessableEntityException('"productId" is not a valid product id');
+    }
 
-    const result = await this.uploadBuffer(file.buffer);
+    const folder = productId ? `${CLOUDINARY_FOLDER}/${productId}` : CLOUDINARY_FOLDER;
+    const result = await this.uploadBuffer(file.buffer, folder);
 
     return {
       url: result.secure_url,
@@ -71,19 +80,16 @@ export class UploadsService {
     };
   }
 
-  private uploadBuffer(buffer: Buffer): Promise<UploadApiResponse> {
+  private uploadBuffer(buffer: Buffer, folder: string): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: CLOUDINARY_FOLDER },
-        (error, result) => {
-          if (error || !result) {
-            this.logger.error(error);
-            reject(new Error(error?.message ?? 'Cloudinary upload failed'));
-            return;
-          }
-          resolve(result);
-        },
-      );
+      const stream = cloudinary.uploader.upload_stream({ folder }, (error, result) => {
+        if (error || !result) {
+          this.logger.error(error);
+          reject(new Error(error?.message ?? 'Cloudinary upload failed'));
+          return;
+        }
+        resolve(result);
+      });
       stream.end(buffer);
     });
   }

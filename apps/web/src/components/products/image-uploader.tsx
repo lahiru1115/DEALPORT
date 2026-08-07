@@ -27,8 +27,14 @@ export interface ImageUploaderHandle {
    * Uploads every file staged since the last commit and returns the full,
    * now-real image list. `ProductForm` calls this right before posting the
    * product, not as each file is picked — see the note below.
+   *
+   * `productId`, when given, groups the uploads under
+   * `dealport/products/{productId}` in Cloudinary rather than the flat
+   * top-level folder. It's only known once the product itself exists —
+   * `ProductForm` omits it for a brand-new product's first save and passes
+   * it on every save after that.
    */
-  commitUploads: () => Promise<ProductImageInput[]>;
+  commitUploads: (productId?: string) => Promise<ProductImageInput[]>;
 }
 
 /**
@@ -76,13 +82,13 @@ export const ImageUploader = forwardRef<
   }, []);
 
   useImperativeHandle(ref, () => ({
-    async commitUploads() {
+    async commitUploads(productId?: string) {
       setCommitting(true);
       try {
         let current = itemsRef.current;
         for (const item of itemsRef.current) {
           if (item.status !== "pending") continue;
-          const result = await api.uploads.image(item.file);
+          const result = await api.uploads.image(item.file, productId);
           URL.revokeObjectURL(item.previewUrl);
           current = current.map((entry) =>
             entry.id === item.id

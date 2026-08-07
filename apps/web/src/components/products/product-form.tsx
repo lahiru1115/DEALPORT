@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -69,7 +69,6 @@ export function ProductForm({ product }: { product?: Product }) {
   const queryClient = useQueryClient();
   const isEdit = Boolean(product);
   const imageUploaderRef = useRef<ImageUploaderHandle>(null);
-  const [uploadingImages, setUploadingImages] = useState(false);
 
   const categoriesQuery = useQuery({
     queryKey: ["categories"],
@@ -86,7 +85,6 @@ export function ProductForm({ product }: { product?: Product }) {
     control,
     watch,
     setValue,
-    trigger,
     formState: { errors, isSubmitting },
   } = useForm<CreateProductInput, unknown, CreateProductPayload>({
     resolver: zodResolver(createProductSchema),
@@ -144,10 +142,25 @@ export function ProductForm({ product }: { product?: Product }) {
       : null;
 
   const mutation = useMutation({
-    mutationFn: (payload: CreateProductPayload) =>
-      product
-        ? api.products.update(product.id, payload)
-        : api.products.create(payload),
+    /*
+      Images upload to Cloudinary here, right before the save, rather than the
+      moment they're picked — see the note on `ImageUploader`. Cloudinary
+      groups each upload under `dealport/products/{productId}`, which for a
+      brand-new product doesn't exist yet: it's created first with no images,
+      then the staged files upload into its now-known id, then a follow-up
+      update attaches them. Editing an existing product already has an id, so
+      it uploads straight into that folder in one pass.
+    */
+    mutationFn: async (payload: CreateProductPayload) => {
+      if (product) {
+        const images = await imageUploaderRef.current!.commitUploads(product.id);
+        return api.products.update(product.id, { ...payload, images });
+      }
+
+      const created = await api.products.create({ ...payload, images: [] });
+      const images = await imageUploaderRef.current!.commitUploads(created.id);
+      return images.length > 0 ? api.products.update(created.id, { images }) : created;
+    },
     onSuccess: (saved) => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       toast.success(
@@ -168,33 +181,14 @@ export function ProductForm({ product }: { product?: Product }) {
   /*
     "Publish Product" and "Save to draft" are the same submit through the same
     validation — they differ only in the `status` they post (plans/02-API.md §3).
-
-    Any staged images are uploaded to Cloudinary here, right before the save,
-    rather than the moment they're picked — see the note on `ImageUploader`.
-    Validated first, so an otherwise-invalid form (missing name, bad price,
-    etc.) never triggers an upload for a product that isn't about to be
-    saved anyway; a failed upload itself aborts before `handleSubmit` runs.
+    Validation (via `handleSubmit`) runs before the mutation fires, so an
+    invalid form never triggers an image upload for a product that isn't
+    actually about to be saved.
   */
-  const submitAs = (status: ProductStatus) => async (event?: React.BaseSyntheticEvent) => {
-    event?.preventDefault();
-    if (pending) return;
+  const submitAs = (status: ProductStatus) =>
+    handleSubmit((values) => mutation.mutate({ ...values, status }));
 
-    if (!(await trigger())) return;
-
-    setUploadingImages(true);
-    try {
-      await imageUploaderRef.current?.commitUploads();
-    } catch (error) {
-      toast.error(isApiError(error) ? error.message : "Image upload failed. Please try again.");
-      return;
-    } finally {
-      setUploadingImages(false);
-    }
-
-    await handleSubmit((values) => mutation.mutate({ ...values, status }))(event);
-  };
-
-  const pending = isSubmitting || mutation.isPending || uploadingImages;
+  const pending = isSubmitting || mutation.isPending;
 
   function toggleColor(color: string) {
     setValue(

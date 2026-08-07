@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   HttpCode,
   HttpStatus,
@@ -27,7 +28,12 @@ export class UploadsController {
   @ApiBody({
     schema: {
       type: 'object',
-      properties: { file: { type: 'string', format: 'binary' } },
+      properties: {
+        file: { type: 'string', format: 'binary' },
+        // Optional — group the upload under `dealport/products/{productId}`
+        // in Cloudinary instead of the flat top-level folder.
+        productId: { type: 'string' },
+      },
     },
   })
   @UseInterceptors(
@@ -36,7 +42,7 @@ export class UploadsController {
       limits: { fileSize: MULTER_CEILING_BYTES },
     }),
   )
-  uploadImage(@UploadedFile() file?: Express.Multer.File) {
-    return this.uploadsService.uploadImage(file);
+  uploadImage(@UploadedFile() file?: Express.Multer.File, @Body('productId') productId?: string) {
+    return this.uploadsService.uploadImage(file, productId);
   }
 }

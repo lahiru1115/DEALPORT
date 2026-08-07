@@ -103,15 +103,18 @@ export function createApi(request: Transport) {
 
     uploads: {
       /**
-       * `multipart/form-data`, field name `file`.
+       * `multipart/form-data`, field name `file`. `productId`, when given,
+       * groups the upload under `dealport/products/{productId}` in Cloudinary
+       * instead of the flat top-level folder — see `ImageUploader`.
        *
        * The content-type header is *not* set here on purpose — the browser has
        * to generate it so it can include the multipart boundary. Setting it
        * manually produces a boundary-less header and the API rejects the body.
        */
-      image: (file: File, options?: CallOptions) => {
+      image: (file: File, productId?: string, options?: CallOptions) => {
         const form = new FormData();
         form.append("file", file);
+        if (productId) form.append("productId", productId);
         return request<UploadImageResult>("/uploads/image", {
           ...options,
           method: "POST",
