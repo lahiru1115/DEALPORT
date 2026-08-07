@@ -20,9 +20,9 @@ const USERS_PER_MINUTE = [
 ].map((value, index) => ({ minute: index, value }));
 
 const COUNTRY_SALES = [
-  { code: "US", name: "US", flag: "🇺🇸", value: "30k", deltaPct: 25.8 },
-  { code: "BR", name: "Brazil", flag: "🇧🇷", value: "30k", deltaPct: -15.8 },
-  { code: "AU", name: "Australia", flag: "🇦🇺", value: "25k", deltaPct: 35.8 },
+  { code: "US", name: "US", flag: "/flags/usa.svg", value: "30k", deltaPct: 25.8 },
+  { code: "BR", name: "Brazil", flag: "/flags/bra.svg", value: "30k", deltaPct: -15.8 },
+  { code: "AU", name: "Australia", flag: "/flags/aus.svg", value: "25k", deltaPct: 35.8 },
 ];
 
 export function LiveUsersCard() {
@@ -68,8 +68,11 @@ export function LiveUsersCard() {
             const positive = country.deltaPct >= 0;
             return (
               <div key={country.code} className="flex items-center gap-3">
-                <span className="text-2xl leading-none" aria-hidden="true">
-                  {country.flag}
+                <span
+                  aria-hidden="true"
+                  className="relative size-8 shrink-0 overflow-hidden rounded-full"
+                >
+                  <Image src={country.flag} alt="" fill className="object-cover" />
                 </span>
                 <div className="w-12 shrink-0">
                   <p className="text-base font-bold text-cyprus">{country.value}</p>
