@@ -33,6 +33,54 @@ seconds to wake it back up — expected, not a bug.
 
 ---
 
+## Architecture notes
+
+```mermaid
+flowchart LR
+    B["Browser"]
+
+    subgraph V["Vercel"]
+      direction TB
+      RSC["Server Components<br/>read httpOnly cookie"]
+      BFF["/api/proxy/[...path]<br/>attaches Bearer"]
+    end
+
+    N["NestJS API<br/>Render"]
+    NE[("Neon<br/>PostgreSQL")]
+    CL["Cloudinary"]
+
+    B --> RSC
+    B --> BFF
+    RSC -->|Bearer| N
+    BFF -->|Bearer| N
+    N --> NE
+    N --> CL
+```
+
+**Auth.** The browser never holds the JWT — it lives in an httpOnly,
+`sameSite=lax`, `secure`-in-production cookie. Server Components read it
+directly; Client Components go through a same-origin proxy
+(`/api/proxy/[...path]`) that attaches the Bearer header server-side, so a
+token in `localStorage` (readable by any script, i.e. any XSS) is never in
+play, and the API origin is never exposed to the browser.
+
+**Backend layering.** `Controller → Service → Prisma`, no Prisma in
+controllers — enforced without exception. Controllers only handle HTTP
+shape (routing, DTO binding, status codes); services own business logic and
+query construction; `PrismaService` is the only thing that touches the
+database. DTOs decorated with `class-validator` are the sole accepted input
+shape, under a global `ValidationPipe({ whitelist, forbidNonWhitelisted })`
+so unexpected fields are rejected, not silently dropped. A global
+`JwtAuthGuard` protects every route by default, opted out per-route with
+`@Public()`.
+
+**Shared types.** `packages/shared` holds zod schemas and TypeScript types
+used by both apps, so the Add Product form validates against the same
+contract the API enforces — a shape mismatch is a compile error, not a
+runtime surprise.
+
+---
+
 ## Repo layout
 
 ```
