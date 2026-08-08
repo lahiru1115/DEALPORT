@@ -33,6 +33,54 @@ seconds to wake it back up — expected, not a bug.
 
 ---
 
+## Architecture notes
+
+```mermaid
+flowchart LR
+    B["Browser"]
+
+    subgraph V["Vercel"]
+      direction TB
+      RSC["Server Components<br/>read httpOnly cookie"]
+      BFF["/api/proxy/[...path]<br/>attaches Bearer"]
+    end
+
+    N["NestJS API<br/>Render"]
+    NE[("Neon<br/>PostgreSQL")]
+    CL["Cloudinary"]
+
+    B --> RSC
+    B --> BFF
+    RSC -->|Bearer| N
+    BFF -->|Bearer| N
+    N --> NE
+    N --> CL
+```
+
+**Auth.** The browser never holds the JWT — it lives in an httpOnly,
+`sameSite=lax`, `secure`-in-production cookie. Server Components read it
+directly; Client Components go through a same-origin proxy
+(`/api/proxy/[...path]`) that attaches the Bearer header server-side, so a
+token in `localStorage` (readable by any script, i.e. any XSS) is never in
+play, and the API origin is never exposed to the browser.
+
+**Backend layering.** `Controller → Service → Prisma`, no Prisma in
+controllers — enforced without exception. Controllers only handle HTTP
+shape (routing, DTO binding, status codes); services own business logic and
+query construction; `PrismaService` is the only thing that touches the
+database. DTOs decorated with `class-validator` are the sole accepted input
+shape, under a global `ValidationPipe({ whitelist, forbidNonWhitelisted })`
+so unexpected fields are rejected, not silently dropped. A global
+`JwtAuthGuard` protects every route by default, opted out per-route with
+`@Public()`.
+
+**Shared types.** `packages/shared` holds zod schemas and TypeScript types
+used by both apps, so the Add Product form validates against the same
+contract the API enforces — a shape mismatch is a compile error, not a
+runtime surprise.
+
+---
+
 ## Repo layout
 
 ```
@@ -112,21 +160,24 @@ the repo.
 
 ### `apps/api/.env`
 
-| Var | Local | Production | Notes |
-|---|---|---|---|
-| `DATABASE_URL` | `postgresql://dealport:dealport@localhost:5432/dealport` | Neon **pooled** URL | Runtime queries |
-| `DIRECT_URL` | same as above | Neon **direct** URL | Migrations only |
-| `JWT_SECRET` | any dev string | 32+ random bytes | |
-| `JWT_EXPIRES_IN` | `7d` | `7d` | |
-| `PORT` | `4000` | injected by Render | |
-| `CORS_ORIGIN` | `http://localhost:3000` | the Vercel URL | Pinned, never `*` |
-| `CLOUDINARY_CLOUD_NAME` / `_API_KEY` / `_API_SECRET` | optional | required | Absent locally → `POST /uploads/image` returns `501`, rest of the API works normally |
-| `NODE_ENV` | `development` | `production` | |
+Exact local values are in `apps/api/.env.example` — this just flags what
+each var is for and what changes in production.
+
+| Var | Required | Notes |
+|---|:--:|---|
+| `DATABASE_URL` | ✅ | Local: docker-compose Postgres. Production: Neon **pooled** URL. |
+| `DIRECT_URL` | ✅ | Migrations only — Neon **direct** URL in production (pooler doesn't support the advisory locks Prisma Migrate needs) |
+| `JWT_SECRET` | ✅ | Any dev string locally; 32+ random bytes in production |
+| `JWT_EXPIRES_IN` | — | Defaults to `7d` |
+| `PORT` | — | Defaults to `4000`; Render injects its own |
+| `CORS_ORIGIN` | ✅ | The Vercel URL in production — pinned, never `*` |
+| `CLOUDINARY_CLOUD_NAME` / `_API_KEY` / `_API_SECRET` | optional | Required for uploads in production. Absent locally → `POST /uploads/image` returns `501`, rest of the API still works |
+| `NODE_ENV` | — | `development` locally, `production` on deploy |
 
 ### `apps/web/.env`
 
-| Var | Local | Production | Notes |
-|---|---|---|---|
-| `API_URL` | `http://localhost:4000` | the Render URL | Server-side only — every browser request goes through the BFF proxy instead |
-| `AUTH_COOKIE_NAME` | `dealport_token` | same | |
-| `NODE_ENV` | `development` | `production` | Gates the cookie `secure` flag |
+| Var | Required | Notes |
+|---|:--:|---|
+| `API_URL` | ✅ | Local: `http://localhost:4000`. Production: the Render URL. Server-side only — every browser request goes through the BFF proxy instead. |
+| `AUTH_COOKIE_NAME` | — | Defaults to `dealport_token` |
+| `NODE_ENV` | — | `development` locally, `production` on deploy — gates the cookie `secure` flag |

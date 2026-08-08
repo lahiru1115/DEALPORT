@@ -132,6 +132,13 @@ export function ProductFilters({
           <PopoverContent align="end" className="w-64">
             <p className="text-caption font-bold text-cyprus">Category</p>
             <Select
+              items={[
+                { value: "all", label: "All categories" },
+                ...categories.map((category) => ({
+                  value: category.id,
+                  label: `${category.name} (${category.productCount})`,
+                })),
+              ]}
               value={categoryId ?? "all"}
               onValueChange={(value) =>
                 onCategoryChange(value === "all" || value == null ? undefined : value)

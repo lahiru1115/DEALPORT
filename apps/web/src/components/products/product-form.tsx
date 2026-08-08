@@ -412,7 +412,11 @@ export function ProductForm({ product }: { product?: Product }) {
                     control={control}
                     name="stockStatus"
                     render={({ field }) => (
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select
+                        items={STOCK_STATUS_LABELS}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -512,6 +516,10 @@ export function ProductForm({ product }: { product?: Product }) {
                   name="categoryId"
                   render={({ field }) => (
                     <Select
+                      items={(categoriesQuery.data?.data ?? []).map((category) => ({
+                        value: category.id,
+                        label: category.name,
+                      }))}
                       value={field.value ?? ""}
                       onValueChange={field.onChange}
                       disabled={categoriesQuery.isError}
