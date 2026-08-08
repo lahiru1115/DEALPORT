@@ -1,0 +1,136 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-ocean-green: #4ea674;
+  --color-cyprus: #023337;
+  --color-surf-crest: #c1e6ba;
+  --color-aqua-spring: #eaf8e7;
+  --color-indigo: #6467f2;
+  --color-success: #21c45d;
+  --color-pending: #f0d411;
+  --color-error: #ef4343;
+  --color-grey: #7c7c7c;
+
+  --color-canvas: #f9fafb;
+  --color-surface: #ffffff;
+  --color-hairline: #ecedee;
+
+  --color-field-border: #e5e7eb;
+
+  --font-sans: var(--font-lato), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 20px;
+  --radius-4xl: 24px;
+  --radius-pill: 8px;
+
+  --shadow-ambient-1: 0 1px 2px rgb(16 24 40 / 0.05);
+  --shadow-ambient-3:
+    0 1px 3px rgb(16 24 40 / 0.1), 0 1px 2px rgb(16 24 40 / 0.06);
+  --shadow-ambient-6:
+    0 6px 16px rgb(16 24 40 / 0.1), 0 2px 4px rgb(16 24 40 / 0.06);
+
+  --spacing-sidebar: 260px;
+  --spacing-sidebar-collapsed: 72px;
+  --spacing-topbar: 96px;
+
+  --color-chart-1: #4ea674;
+  --color-chart-2: #6467f2;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  --background: var(--color-canvas);
+  --foreground: var(--color-cyprus);
+
+  --card: var(--color-surface);
+  --card-foreground: var(--color-cyprus);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-cyprus);
+
+  --primary: var(--color-ocean-green);
+  --primary-foreground: #ffffff;
+
+  --secondary: var(--color-aqua-spring);
+  --secondary-foreground: var(--color-cyprus);
+
+  --muted: var(--color-canvas);
+  --muted-foreground: var(--color-grey);
+
+  --accent: var(--color-aqua-spring);
+  --accent-foreground: var(--color-cyprus);
+
+  --destructive: var(--color-error);
+
+  --border: var(--color-hairline);
+
+  --input: var(--color-canvas);
+  --ring: var(--color-ocean-green);
+
+  --radius: 10px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+}
+
+@utility text-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+@utility text-section {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+@utility text-caption {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hairline) transparent;
+}

@@ -1,0 +1,6 @@
+# Fake placeholder token in NestJS's own `nest new` scaffolded README boilerplate
+# (a CircleCI badge link pointing at nestjs/nest's own upstream repo, unused, since
+# removed from apps/api/README.md). Not a real secret. Kept here only because the
+# historical commit that introduced it can't be un-flagged without rewriting git
+# history, which is unwarranted for a zero-risk placeholder string.
+28a67876b00464e1db984e255161f1b56530dcff:apps/api/README.md:generic-api-key:5
