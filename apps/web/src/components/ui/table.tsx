@@ -58,7 +58,10 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
   return (
     <tbody
       data-slot="table-body"
-      className={cn("[&_tr:last-child]:border-0", className)}
+      className={cn(
+        "[&_tr:last-child]:border-0 [&_tr]:hover:bg-canvas [&_tr]:hover:shadow-ambient-1",
+        className
+      )}
       {...props}
     />
   )
@@ -82,7 +85,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b border-border transition-colors hover:bg-canvas hover:shadow-ambient-1 data-[state=selected]:bg-aqua-spring",
+        "border-b border-border transition-colors data-[state=selected]:bg-aqua-spring",
         className
       )}
       {...props}
@@ -97,7 +100,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
       className={cn(
         // Case is left to the call site: Categories renders "Created Date",
         // Best selling renders "TOTAL ORDER".
-        "h-14 px-4 text-left align-middle text-base font-normal whitespace-nowrap text-cyprus [&:has([role=checkbox])]:pr-0",
+        "h-14 px-4 text-left align-middle text-base font-normal whitespace-nowrap text-cyprus has-[[role=checkbox]]:pr-0",
         className
       )}
       {...props}
@@ -110,7 +113,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     <td
       data-slot="table-cell"
       className={cn(
-        "px-4 py-3.5 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
+        "px-4 py-3.5 align-middle whitespace-nowrap has-[[role=checkbox]]:pr-0",
         className
       )}
       {...props}
