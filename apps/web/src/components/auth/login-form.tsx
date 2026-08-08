@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 const DEMO_CREDENTIALS: LoginInput = {
   email: "admin@dealport.com",
-  password: "Admin@123",
+  password: "Admin@123", // gitleaks:allow — seeded demo credential, documented in prisma/seed.ts and README
 };
 
 function safeRedirectTarget(next: string | null): string {
