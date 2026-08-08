@@ -404,6 +404,7 @@ export function ProductForm({ product }: { product?: Product }) {
                         type="date"
                         aria-label="Sale start date"
                         aria-invalid={Boolean(errors.saleStartsAt)}
+                        className="[&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-4 [&::-webkit-calendar-picker-indicator]:opacity-0"
                         {...register("saleStartsAt")}
                       />
                       <CalendarIcon className="pointer-events-none absolute top-1/2 right-4 size-5 -translate-y-1/2 text-grey" />
@@ -416,6 +417,7 @@ export function ProductForm({ product }: { product?: Product }) {
                         type="date"
                         aria-label="Sale end date"
                         aria-invalid={Boolean(errors.saleEndsAt)}
+                        className="[&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-4 [&::-webkit-calendar-picker-indicator]:opacity-0"
                         {...register("saleEndsAt")}
                       />
                       <CalendarIcon className="pointer-events-none absolute top-1/2 right-4 size-5 -translate-y-1/2 text-grey" />
