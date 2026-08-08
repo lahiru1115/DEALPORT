@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 
-/** Outside the shell — an unmatched top-level route. */
 export default function NotFound() {
   return (
     <main className="grid min-h-dvh place-items-center bg-canvas px-5 text-center">

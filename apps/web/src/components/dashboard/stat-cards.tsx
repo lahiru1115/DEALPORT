@@ -27,7 +27,6 @@ function Delta({ pct }: { pct: number }) {
   );
 }
 
-/** Every kebab menu and "Details" button here is decorative — the brief scopes no drill-down page behind them. */
 function CardMenuButton() {
   return (
     <button
@@ -48,10 +47,6 @@ function DetailsButton() {
   );
 }
 
-/**
- * `GET /dashboard/stats` — measured off `2 Dashboard.png`: three equal cards,
- * the third split by a vertical rule into Pending / Canceled.
- */
 export function StatCards({ stats }: { stats: DashboardStats }) {
   return (
     <>
@@ -109,13 +104,6 @@ export function StatCards({ stats }: { stats: DashboardStats }) {
           <CardMenuButton />
         </div>
         <p className="text-caption mb-5 text-grey">Last 7 days</p>
-        {/*
-          Grid, not flex — measured off `2 Dashboard.png`: "Pending" and
-          "Canceled" sit in two equal-width columns (the divider bisects the
-          card exactly), not two intrinsically-sized blocks that only happen
-          to line up. A flex row can't guarantee that once the numbers on
-          either side differ in width.
-        */}
         <div className="relative mb-5 grid flex-1 grid-cols-2 items-start gap-6">
           <div>
             <p className="mb-2 text-base text-cyprus">Pending</p>

@@ -3,10 +3,6 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import { IS_PUBLIC_KEY } from '../../common/decorators/public.decorator';
 
-/**
- * Registered globally via APP_GUARD — an unguarded route is a deliberate act
- * (@Public()), not an oversight. See plans/01-ARCHITECTURE.md §3.3.
- */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(private readonly reflector: Reflector) {

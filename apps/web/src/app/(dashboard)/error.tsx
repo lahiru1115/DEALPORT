@@ -5,14 +5,6 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-/**
- * Covers every route under the shell — most importantly the dashboard's
- * `Promise.all([...])` in `dashboard/page.tsx`, which has no per-widget
- * fallback: one failed request currently fails the whole page. `error.tsx`
- * cannot catch errors from the sibling `layout.tsx` (Next's boundary rules),
- * so a `requireSession()` redirect failure is unaffected by this — this is
- * only for the data-fetching pages themselves.
- */
 export default function DashboardError({
   error,
   reset,

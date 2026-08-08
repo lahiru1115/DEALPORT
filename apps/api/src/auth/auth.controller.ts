@@ -28,12 +28,6 @@ export class AuthController {
   }
 }
 
-/**
- * `req.ip` here is the socket peer address, which in this deployment is
- * always the Next.js BFF calling server-to-server — not the browser. The
- * BFF forwards the real client IP via `X-Forwarded-For` (see
- * `apps/web/src/app/api/auth/login/route.ts`); prefer that when present.
- */
 function resolveClientIp(req: Request): string | null {
   const forwardedFor = req.headers['x-forwarded-for'];
   const forwarded = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor;

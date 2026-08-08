@@ -37,7 +37,6 @@ export function TransactionCard({ transactions }: { transactions: Transaction[] 
     <Card className="col-span-3 lg:col-span-2">
       <div className="mb-5 flex items-center justify-between">
         <h3 className="text-title text-cyprus">Transaction</h3>
-        {/* No filter behaviour is defined for the dashboard in scope — visual only. */}
         <Button size="sm" className="rounded-full">
           Filter
           <FilterIcon className="size-4" />

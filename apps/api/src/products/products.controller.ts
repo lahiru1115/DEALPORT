@@ -23,8 +23,6 @@ import { ProductsService } from './products.service';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  // Static segments ('top', 'best-selling') must be declared before the ':id'
-  // route below, or Express will greedily match them as an id param.
   @Get('top')
   topProducts(@Query() query: TopProductsQueryDto) {
     return this.productsService.topProducts(query.limit);

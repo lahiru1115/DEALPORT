@@ -9,12 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-/**
- * Neither "Users in last 30 minutes" nor "Sales by Country" has a backing
- * endpoint — `plans/02-API.md` has no realtime-analytics or geo-sales route,
- * and the brief permits static data when documented (§7). Both are static
- * here, matching the artwork's own numbers.
- */
 const USERS_PER_MINUTE = [
   4, 7, 3, 8, 5, 9, 4, 6, 8, 3, 7, 5, 9, 6, 4, 8, 5, 7, 9, 6, 4, 8, 6, 9,
 ].map((value, index) => ({ minute: index, value }));
@@ -49,18 +43,11 @@ export function LiveUsersCard() {
         </ResponsiveContainer>
       </div>
 
-      {/* Outside the map, not layered over it — measured off `2 Dashboard.png`. */}
       <div className="mb-4 flex items-center justify-between">
         <p className="text-base font-bold text-cyprus">Sales by Country</p>
         <p className="text-caption text-grey">Sales</p>
       </div>
 
-      {/*
-        `-mx-6` cancels the card's own `p-6` so the map reaches the card's
-        left/right edges — the design bleeds it full-width. Only the image
-        bleeds, though: the row content below gets that same 24px back via
-        `px-6`, so flags/numbers/bars stay aligned with the header above.
-      */}
       <div className="relative -mx-6 flex-1 overflow-hidden">
         <Image
           src="/brand/world-map.svg"

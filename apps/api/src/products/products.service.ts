@@ -185,7 +185,6 @@ export class ProductsService {
     }));
   }
 
-  /** Cross-field rules the doc marks "service asserts" rather than a decorator (plans/02-API.md §3). */
   private assertPriceAndSaleWindow(
     dto: Partial<
       Pick<CreateProductDto, 'price' | 'discountedPrice' | 'saleStartsAt' | 'saleEndsAt'>
@@ -230,10 +229,6 @@ export class ProductsService {
   }
 }
 
-/**
- * Prisma's Decimal#toString() strips trailing zeros ("999" instead of "999.00") —
- * money fields are formatted to a fixed 2dp string to match plans/02-API.md's contract.
- */
 function formatProductMoney<
   T extends { price: Prisma.Decimal; discountedPrice: Prisma.Decimal | null },
 >(

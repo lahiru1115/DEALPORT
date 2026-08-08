@@ -23,29 +23,9 @@ type UploaderItem =
   | { id: string; status: "pending"; file: File; previewUrl: string; isPrimary: boolean };
 
 export interface ImageUploaderHandle {
-  /**
-   * Uploads every file staged since the last commit and returns the full,
-   * now-real image list. `ProductForm` calls this right before posting the
-   * product, not as each file is picked — see the note below.
-   *
-   * `productId`, when given, groups the uploads under
-   * `dealport/products/{productId}` in Cloudinary rather than the flat
-   * top-level folder. It's only known once the product itself exists —
-   * `ProductForm` omits it for a brand-new product's first save and passes
-   * it on every save after that.
-   */
   commitUploads: (productId?: string) => Promise<ProductImageInput[]>;
 }
 
-/**
- * Picking a file only stages it locally (an object-URL preview) — nothing
- * reaches Cloudinary until `commitUploads` runs, which `ProductForm` calls
- * immediately before "Publish Product" / "Save to draft". Uploading eagerly
- * on pick — the previous behaviour — left an orphaned Cloudinary asset behind
- * every time someone picked an image and then abandoned the page without
- * saving. A file removed before commit is simply discarded; it was never
- * uploaded, so there's nothing on the server to clean up.
- */
 export const ImageUploader = forwardRef<
   ImageUploaderHandle,
   {
@@ -53,8 +33,6 @@ export const ImageUploader = forwardRef<
     onChange: (images: ProductImageInput[]) => void;
   }
 >(function ImageUploader({ images, onChange }, ref) {
-  // Seeded once from the current field value; from here on the component
-  // owns the list itself and only reports back to the form on commit.
   const [items, setItems] = useState<UploaderItem[]>(() =>
     images.map((image, index) => ({
       id: `existing-${index}`,
@@ -71,8 +49,6 @@ export const ImageUploader = forwardRef<
   const itemsRef = useRef(items);
   itemsRef.current = items;
 
-  // Pending previews are object URLs — revoke whatever's left on unmount so
-  // an abandoned page doesn't keep blobs alive for the tab's lifetime.
   useEffect(() => {
     return () => {
       for (const item of itemsRef.current) {
@@ -135,8 +111,6 @@ export const ImageUploader = forwardRef<
     };
 
     if (mode === "replace") {
-      // The new file becomes primary; the old primary stays as a secondary
-      // rather than being discarded.
       setItems([item, ...items.map((existing) => ({ ...existing, isPrimary: false }))]);
     } else {
       setItems([...items, item]);
@@ -148,8 +122,6 @@ export const ImageUploader = forwardRef<
     if (target?.status === "pending") URL.revokeObjectURL(target.previewUrl);
 
     const next = items.filter((item) => item.id !== id);
-    // Removing the primary promotes the next image, so a product never ends up
-    // with images but no primary.
     if (next.length > 0 && !next.some((item) => item.isPrimary)) {
       next[0] = { ...next[0], isPrimary: true };
     }

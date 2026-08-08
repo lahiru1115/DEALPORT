@@ -1,21 +1,8 @@
-/**
- * DEALPORT seed — idempotent.
- *
- * Safe to run repeatedly: users/categories/tags/products are upserted by their
- * unique keys, and the read-only Order/OrderItem tables are rebuilt from scratch
- * so the dashboard's trailing-14-day window always lands relative to "now".
- *
- * Product `totalOrders` is a denormalised lifetime counter (it backs the Best
- * Selling "TOTAL ORDER" column). The Order rows below cover only the last 14
- * days, which is what the dashboard aggregates — the two are deliberately
- * independent, not a mismatch.
- */
 import { PrismaClient, ProductStatus, StockStatus, OrderStatus, PaymentMethod } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-/** Deterministic PRNG so re-seeding produces identical data. */
 function mulberry32(seed: number) {
   return function random() {
     seed |= 0;
@@ -37,12 +24,7 @@ const slugify = (s: string) =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 
-/** Deterministic placeholder imagery — replaced by real Cloudinary uploads on create. */
 const imageFor = (slug: string) => `https://picsum.photos/seed/${slug}/600/600`;
-
-// ---------------------------------------------------------------------------
-// Taxonomy
-// ---------------------------------------------------------------------------
 
 const CATEGORIES = [
   'Electronic',
@@ -69,14 +51,6 @@ const TAGS = [
   'Sale',
   'Premium',
 ] as const;
-
-// ---------------------------------------------------------------------------
-// Catalogue
-//
-// The first four are the products the Dashboard mock shows in Top Products and
-// Best selling product. They carry the highest `totalOrders` on purpose, so the
-// real API ordering (totalOrders desc) reproduces the design.
-// ---------------------------------------------------------------------------
 
 type SeedProduct = {
   name: string;
@@ -462,8 +436,6 @@ const CUSTOMER_NAMES = [
   'Liam O’Connor',
 ] as const;
 
-// ---------------------------------------------------------------------------
-
 async function seedUser() {
   const passwordHash = await bcrypt.hash('Admin@123', 10); // gitleaks:allow — intentionally public seed/demo credential, per brief §9
   const user = await prisma.user.upsert({
@@ -579,11 +551,6 @@ async function seedProducts(
   return ids;
 }
 
-/**
- * Rebuilt every run so `placedAt` always spans the trailing 14 days — the
- * dashboard compares the last 7 against the 7 before to compute deltaPct.
- * Volume is weighted higher in the recent week so the deltas read positive.
- */
 async function seedOrders(products: { id: string; price: number; status: ProductStatus }[]) {
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();

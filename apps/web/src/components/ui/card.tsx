@@ -2,13 +2,6 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-/*
-  Custom, not shadcn's Card — the kit's card is one specific object, and every
-  panel on all three screens is an instance of it. Measured off the exports:
-  white surface, 12px radius, 24px padding, 1px #ECEDEE hairline, ambient-3.
-  (The spec said 16px radius; the artwork's corner curve fits 12.)
-*/
-
 function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -22,11 +15,6 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-/**
- * The title row the design repeats on every card: heading on the left, optional
- * actions on the right. `title` is rendered as the Bold-18 "Title for Dashboard"
- * style unless a node is passed instead.
- */
 function CardHeader({
   className,
   title,
@@ -57,10 +45,6 @@ function CardHeader({
   );
 }
 
-/**
- * Cards that hold a full-bleed table need the table to reach the card edge while
- * the header keeps its 24px inset. This cancels the padding for that child only.
- */
 function CardBleed({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

@@ -8,7 +8,6 @@ import type { WidgetProduct } from "@dealport/shared";
 import { ImageOutlineIcon, SearchIcon } from "@/components/icons/generated";
 import { Card } from "@/components/ui/card";
 
-/** `GET /products/top` — the brief's explicit "must load from the products API" widget. */
 export function TopProductsCard({ products }: { products: WidgetProduct[] }) {
   const [search, setSearch] = useState("");
   const filtered = search.trim()

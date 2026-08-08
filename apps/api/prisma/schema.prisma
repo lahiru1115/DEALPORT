@@ -1,9 +1,3 @@
-// DEALPORT data model — see plans/01-ARCHITECTURE.md §4
-//
-// Every Product field below backs a control on the Add Product screen.
-// Order / OrderItem are read-only: seeded so the Dashboard aggregates real rows,
-// never written by the app.
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -59,10 +53,6 @@ model User {
   @@map("users")
 }
 
-// One row per login attempt (success and failure) — an audit trail of who
-// logged in when, from where, and with what client. `email`/`success` are
-// kept even when `userId` is null so failed attempts against unknown emails
-// still show up in the trail.
 model LoginEvent {
   id        String   @id @default(cuid())
   email     String
@@ -111,7 +101,6 @@ model Product {
   sku         String  @unique
   description String?
 
-  // Money as Decimal(10,2) — binary float rounding is visible on a price field
   price           Decimal  @db.Decimal(10, 2)
   discountedPrice Decimal? @db.Decimal(10, 2)
   taxIncluded     Boolean  @default(true)
@@ -124,13 +113,11 @@ model Product {
   unlimitedStock Boolean     @default(false)
   stockStatus    StockStatus @default(IN_STOCK)
 
-  // "Publish Product" vs "Save to draft" on the Add Product screen
   status   ProductStatus @default(DRAFT)
   featured Boolean       @default(false)
 
   colors String[] @default([])
 
-  // Denormalised sales counter — powers Best Selling / Top Products ordering
   totalOrders Int @default(0)
 
   categoryId String?
@@ -146,7 +133,6 @@ model Product {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Exactly the columns the Product List filters and sorts by
   @@index([status])
   @@index([categoryId])
   @@index([createdAt])

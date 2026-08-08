@@ -3,11 +3,6 @@
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
 
-/*
-  shadcn ships this reading the active theme from `next-themes`. DEALPORT has no
-  dark mode (brief §5), so the theme is pinned to light and the dependency is
-  dropped rather than carried for a toggle that never fires.
-*/
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner

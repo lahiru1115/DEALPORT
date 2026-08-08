@@ -219,7 +219,7 @@ describe('ProductsService', () => {
     });
 
     it('allows a missing stockQuantity when unlimitedStock is true', async () => {
-      prisma.product.findUnique.mockResolvedValue(null); // slug/sku uniqueness checks
+      prisma.product.findUnique.mockResolvedValue(null);
       prisma.product.create.mockResolvedValue(
         buildProduct({ unlimitedStock: true, stockQuantity: null }),
       );
@@ -231,9 +231,9 @@ describe('ProductsService', () => {
 
     it('retries slug generation on collision and appends a numeric suffix', async () => {
       prisma.product.findUnique
-        .mockResolvedValueOnce({ id: 'existing' }) // 'new-widget' taken
-        .mockResolvedValueOnce(null) // 'new-widget-2' free
-        .mockResolvedValueOnce(null); // sku uniqueness check
+        .mockResolvedValueOnce({ id: 'existing' })
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(null);
       prisma.product.create.mockResolvedValue(buildProduct());
 
       await service.create(validDto);

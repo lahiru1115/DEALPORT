@@ -9,10 +9,6 @@ function initials(name: string): string {
   return (first + last).toUpperCase();
 }
 
-/**
- * `avatarUrl` comes back `null` for a user who hasn't uploaded one — falls
- * back to initials on an ocean-green tint rather than a broken image request.
- */
 function Avatar({
   src,
   name,

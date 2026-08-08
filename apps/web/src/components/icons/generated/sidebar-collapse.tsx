@@ -1,5 +1,3 @@
-// Generated from design/icons/sidebar-collapse.svg — do not edit by hand.
-// Run `npm run icons:generate -w @dealport/web` to regenerate.
 import type { SVGProps } from "react";
 
 export function SidebarCollapseIcon(props: SVGProps<SVGSVGElement>) {

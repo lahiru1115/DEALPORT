@@ -6,17 +6,6 @@ import { executeRequest } from "@/lib/api/request";
 import { setAuthCookie } from "@/lib/auth/session";
 import { API_URL } from "@/lib/env";
 
-/**
- * `POST /api/auth/login`
- *
- * The one place the JWT is ever handled in the Next.js layer. It forwards the
- * credentials to NestJS, then writes the returned token into an httpOnly
- * cookie and returns **only the user** to the browser — the token itself never
- * reaches client JavaScript (plans/01-ARCHITECTURE.md §5).
- *
- * This cannot go through the generic proxy: the proxy attaches a token, and
- * this is the request that obtains one.
- */
 export async function POST(request: Request) {
   let payload: unknown;
   try {
@@ -28,8 +17,6 @@ export async function POST(request: Request) {
     );
   }
 
-  // Validated here as well as on the API so an obviously malformed request
-  // never leaves this process.
   const parsed = loginSchema.safeParse(payload);
   if (!parsed.success) {
     return NextResponse.json(
@@ -42,10 +29,6 @@ export async function POST(request: Request) {
   }
 
   try {
-    // The API sees this request coming from this server, not the browser —
-    // forward the browser's real IP/user-agent so the login-event audit log
-    // (apps/api/src/auth/auth.controller.ts `resolveClientIp`) records the
-    // actual client, not this process.
     const forwardedFor = request.headers.get("x-forwarded-for");
     const userAgent = request.headers.get("user-agent");
 
@@ -64,18 +47,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ user: result.user });
   } catch (error) {
     if (error instanceof ApiError) {
-      /*
-        Passed through as-is. The API answers 401 identically for an unknown
-        email and a wrong password so it cannot be used to enumerate accounts
-        (plans/02-API.md §2) — reworded here, that property would be lost.
-      */
       return NextResponse.json(
         error.body ?? { statusCode: error.status, message: error.message },
         { status: error.status },
       );
     }
 
-    // The API being unreachable is not a credentials problem; say so.
     return NextResponse.json(
       { statusCode: 502, message: "Could not reach the server. Please try again." },
       { status: 502 },

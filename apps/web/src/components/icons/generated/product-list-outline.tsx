@@ -1,5 +1,3 @@
-// Generated from design/icons/product-list-outline.svg — do not edit by hand.
-// Run `npm run icons:generate -w @dealport/web` to regenerate.
 import type { SVGProps } from "react";
 
 export function ProductListOutlineIcon(props: SVGProps<SVGSVGElement>) {

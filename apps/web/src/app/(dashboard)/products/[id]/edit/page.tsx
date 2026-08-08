@@ -9,10 +9,6 @@ export const metadata: Metadata = {
   title: "Edit Product",
 };
 
-/**
- * Fetched on the server so the form renders already populated — no empty
- * fields flashing while a client query resolves.
- */
 export default async function EditProductPage({
   params,
 }: {

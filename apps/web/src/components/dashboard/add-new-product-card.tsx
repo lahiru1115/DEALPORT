@@ -6,13 +6,6 @@ import type { Category } from "@dealport/shared";
 import { CirclePlusOutlineIcon, ImageOutlineIcon } from "@/components/icons/generated";
 import { Card } from "@/components/ui/card";
 
-/**
- * The kit's "Product" suggestion rows (Smart Fitness Tracker, Leather Wallet…)
- * have no backing list in the API — there is no "suggested products" endpoint
- * — so they are static, matching the artwork's own items. The category rows
- * above them are real (`GET /categories`) and link into the Product List's
- * existing category filter.
- */
 const SUGGESTED_PRODUCTS = [
   { name: "Smart Fitness Tracker", price: "39.99" },
   { name: "Leather Wallet", price: "19.99" },

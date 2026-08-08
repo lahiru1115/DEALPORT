@@ -24,9 +24,7 @@ export type NavIcon = ComponentType<SVGProps<SVGSVGElement>>;
 export interface NavItem {
   label: string;
   icon: NavIcon;
-  /** Swapped in for `icon` while this row is the active route — falls back to `icon` when omitted. */
   activeIcon?: NavIcon;
-  /** Only the three routes the brief (§5) requires to actually navigate. */
   href?: string;
 }
 
@@ -35,12 +33,6 @@ export interface NavGroup {
   items: NavItem[];
 }
 
-/**
- * The kit's full sidebar, off `design/screens/2 Dashboard.png`. Every item is
- * rendered at full fidelity; only `href` items are real routes — the rest are
- * inert per brief §5 (present so the shell reads as the whole product, not
- * wired up because there is no screen behind them).
- */
 export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Main menu",
@@ -87,7 +79,6 @@ export const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-/** Flat lookup so the topbar can title itself off the active route. */
 export const NAV_TITLES: Record<string, string> = Object.fromEntries(
   NAV_GROUPS.flatMap((group) => group.items)
     .filter((item): item is NavItem & { href: string } => Boolean(item.href))

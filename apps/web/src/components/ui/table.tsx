@@ -4,17 +4,6 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-/*
-  Rethemed to the kit's table: 1px hairline row dividers, no divider under the
-  last row, and a soft hover lift.
-
-  The header fill is a prop, not a default, because the kit uses two header
-  treatments and the spec only documented one. `6 Categories.png` and the
-  dashboard's "Best selling product" fill the header aqua-spring; the
-  dashboard's "Transaction" table leaves it white with a hairline beneath.
-  Baking aqua-spring in would silently make Transaction wrong.
-*/
-
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
@@ -35,7 +24,6 @@ function TableHeader({
   variant = "filled",
   ...props
 }: React.ComponentProps<"thead"> & {
-  /** `filled` = aqua-spring (Categories, Best selling) · `plain` = white with a hairline (Transaction) */
   variant?: "filled" | "plain"
 }) {
   return (
@@ -98,8 +86,6 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        // Case is left to the call site: Categories renders "Created Date",
-        // Best selling renders "TOTAL ORDER".
         "h-14 px-4 text-left align-middle text-base font-normal whitespace-nowrap text-cyprus has-[[role=checkbox]]:pr-0",
         className
       )}

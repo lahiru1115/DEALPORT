@@ -10,18 +10,9 @@ import { Topbar } from "./topbar";
 
 const STORAGE_KEY = "dealport:sidebar-collapsed";
 
-/**
- * Owns the collapse state and shares it between `Sidebar` (which renders
- * icon-only when collapsed) and this wrapper's own content offset — they're
- * siblings, not parent/child, so the state has to live above both. Kept as
- * plain lifted state rather than a context: there are exactly two consumers.
- */
 export function DashboardShell({ user, children }: { user: AuthUser; children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
 
-  // Read after mount, not as the initial state, so the server-rendered HTML
-  // and the first client render agree (avoids a hydration mismatch) — this
-  // one extra render is the cost of persisting the preference at all.
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     if (stored === "1") setCollapsed(true);
@@ -45,7 +36,6 @@ export function DashboardShell({ user, children }: { user: AuthUser; children: R
         )}
       >
         <Topbar user={user} />
-        {/* Content insets measured off `2 Dashboard.png` / `6 Categories.png` / `8 Add Product.png` — asymmetric on purpose (20 left, 44 right). */}
         <main className="flex-1 py-5 pr-11 pl-5">{children}</main>
       </div>
     </div>

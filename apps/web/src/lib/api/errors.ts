@@ -1,14 +1,5 @@
 import { firstErrorMessage, type ApiErrorBody } from "@dealport/shared";
 
-/**
- * A failed API call, carrying enough for a caller to react to *why* it failed
- * rather than just that it did — 401 sends the user to login, 409 means a
- * duplicate slug/sku, 422 an unsupported upload type.
- *
- * `message` is already unwrapped from the API's `string | string[]` union (the
- * array form is one entry per failed validation constraint), so UI code can
- * render it directly.
- */
 export class ApiError extends Error {
   readonly status: number;
   readonly body: ApiErrorBody | null;
@@ -20,7 +11,6 @@ export class ApiError extends Error {
     this.body = body;
   }
 
-  /** Every validation message, for forms that want to show more than the first. */
   get messages(): string[] {
     const message = this.body?.message;
     if (Array.isArray(message)) return message;

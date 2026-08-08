@@ -1,11 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-/**
- * Shown while `dashboard/page.tsx`'s `Promise.all([...])` is in flight —
- * mirrors the real grid (§2 of `05-MEASURED-SPEC.md`) so nothing reflows once
- * the data lands.
- */
 export default function DashboardLoading() {
   return (
     <div className="grid grid-cols-3 gap-4">

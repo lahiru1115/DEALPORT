@@ -33,10 +33,6 @@ export default tseslint.config(
     },
   },
   {
-    // Jest's own types (jest.fn(), expect.objectContaining(), mock.calls[n][n]) are
-    // inherently `any`-typed, which trips these rules throughout any spec file
-    // regardless of how the test itself is written. Scoped to tests only — production
-    // code under src/ (outside *.spec.ts) keeps full type-aware linting.
     files: ['**/*.spec.ts', 'test/**/*.ts'],
     rules: {
       '@typescript-eslint/no-unsafe-assignment': 'off',

@@ -35,9 +35,6 @@ export class AuthService {
     const passwordValid = user ? await bcrypt.compare(dto.password, user.passwordHash) : false;
     const success = Boolean(user && passwordValid);
 
-    // Logged for both outcomes — a failed attempt (wrong password, or an
-    // unknown email) is exactly what an audit trail of login activity needs
-    // to show, not just successes.
     await this.prisma.loginEvent.create({
       data: {
         email: dto.email,
@@ -48,8 +45,6 @@ export class AuthService {
       },
     });
 
-    // Deliberately identical outcome for "unknown email" and "wrong password" —
-    // this endpoint must not be usable to enumerate accounts (plans/02-API.md §2).
     if (!user || !passwordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }

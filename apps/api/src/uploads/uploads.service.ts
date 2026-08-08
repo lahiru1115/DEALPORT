@@ -12,9 +12,6 @@ const MAX_BYTES = 5 * 1024 * 1024;
 const ACCEPTED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const CLOUDINARY_FOLDER = 'dealport/products';
 
-// Prisma's `cuid()` default — matches the `Product.id` format exactly. This
-// is checked because `productId` becomes a Cloudinary folder segment, and it
-// arrives as a plain client-supplied string.
 const PRODUCT_ID_PATTERN = /^[a-z0-9]{20,32}$/;
 
 export interface UploadImageResult {
@@ -80,12 +77,6 @@ export class UploadsService {
     };
   }
 
-  /**
-   * Best-effort cleanup — called when a product's images are replaced or the
-   * product itself is deleted. Never throws: an orphaned Cloudinary asset is
-   * a cost/clutter issue, not a reason to fail the request that already
-   * committed the DB change.
-   */
   async destroyImages(publicIds: (string | null | undefined)[]): Promise<void> {
     const ids = publicIds.filter((id): id is string => Boolean(id));
     if (!this.configured || ids.length === 0) {

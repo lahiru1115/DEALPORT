@@ -11,10 +11,6 @@ interface Window {
   end: Date;
 }
 
-/**
- * Read-only aggregations over seeded Order/OrderItem/Product data — see
- * plans/02-API.md §6. Nothing here writes; the dashboard has no create/update path.
- */
 @Injectable()
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
@@ -138,8 +134,6 @@ export class DashboardService {
     });
 
     return {
-      // Prisma's Decimal#toString() strips trailing zeros ("45" instead of "45.00") —
-      // money fields are formatted to a fixed 2dp string to match plans/02-API.md's contract.
       data: data.map((order) => ({ ...order, amount: order.amount.toFixed(2) })),
     };
   }
@@ -153,7 +147,7 @@ export class DashboardService {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
-    const last7End = new Date(startOfToday.getTime() + DAY_MS); // tomorrow 00:00, exclusive
+    const last7End = new Date(startOfToday.getTime() + DAY_MS);
     const last7Start = new Date(last7End.getTime() - 7 * DAY_MS);
     const prev7End = last7Start;
     const prev7Start = new Date(prev7End.getTime() - 7 * DAY_MS);
@@ -167,7 +161,7 @@ export class DashboardService {
   private weekWindow(weeksAgo: number): Window {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
-    const dayOfWeek = startOfToday.getDay(); // 0 = Sun
+    const dayOfWeek = startOfToday.getDay();
     const start = new Date(startOfToday.getTime() - dayOfWeek * DAY_MS - weeksAgo * 7 * DAY_MS);
     const end = new Date(start.getTime() + 7 * DAY_MS);
     return { start, end };

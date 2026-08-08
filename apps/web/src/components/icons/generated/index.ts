@@ -1,5 +1,3 @@
-// Generated — do not edit by hand.
-// Run `npm run icons:generate -w @dealport/web` to regenerate.
 export { AiBeautifyIcon } from "./ai-beautify";
 export { ArrowRefreshIcon } from "./arrow-refresh";
 export { ArrowUpDownOutlineIcon } from "./arrow-up-down-outline";

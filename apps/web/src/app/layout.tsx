@@ -6,13 +6,6 @@ import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
 
-/*
-  Lato at 400/700 — Google Fonts' Lato has no 500, so "Medium" in the design
-  maps to 400 (Regular body/labels, Bold titles and buttons) rather than
-  synthesizing a faux weight.
-  `display: "swap"` plus next/font's self-hosting keeps the fallback flash off
-  the fidelity checklist without blocking first paint.
-*/
 const lato = Lato({
   variable: "--font-lato",
   subsets: ["latin"],
@@ -35,11 +28,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/*
-        Browser extensions (Grammarly, password managers, etc.) inject
-        attributes onto `<body>` before React hydrates, which React then
-        reports as a mismatch even though nothing is actually wrong.
-      */}
       <body className={`${lato.variable} antialiased`} suppressHydrationWarning>
         <Providers>{children}</Providers>
         <Toaster />

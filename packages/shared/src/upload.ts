@@ -1,12 +1,3 @@
-/**
- * `POST /uploads/image` — see plans/02-API.md §5.
- *
- * Upload and product-save are separate calls, but the Add Product screen only
- * fires this one at save time (right before "Publish Product" / "Save to
- * draft"), not the moment a file is picked — see `ImageUploader` in
- * `apps/web`. Uploading eagerly on pick left an orphaned Cloudinary asset
- * behind every time someone chose an image and abandoned the page.
- */
 export interface UploadImageResult {
   url: string;
   publicId: string;
@@ -16,7 +7,6 @@ export interface UploadImageResult {
   bytes: number;
 }
 
-/** Mirrors the API's own limits, so the client can reject before uploading. */
 export const UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
 
 export const UPLOAD_ACCEPTED_MIME_TYPES = [
@@ -28,11 +18,6 @@ export const UPLOAD_ACCEPTED_MIME_TYPES = [
 export type UploadAcceptedMimeType =
   (typeof UPLOAD_ACCEPTED_MIME_TYPES)[number];
 
-/**
- * Returns a human-readable reason the file cannot be uploaded, or `null` if it
- * is acceptable. Checking client-side turns a 413/422 round trip into instant
- * feedback; the API still enforces both limits regardless.
- */
 export function validateUploadFile(file: {
   size: number;
   type: string;

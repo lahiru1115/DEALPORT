@@ -2,33 +2,9 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/*
-  DEALPORT theme.
-
-  Palette and type come from `design/design-system/`. Everything else —
-  neutrals, radii, elevation, shell metrics — was measured directly off the
-  2x screen exports in `design/screens/` rather than eyeballed, because the
-  written spec and the actual artwork disagree in a few places. Measured
-  values win, and the ones that differ from plans/03-DESIGN-SYSTEM.md are
-  called out inline.
-
-  Two layers, deliberately:
-   1. `@theme` holds the kit's own named tokens. A plain `@theme` (not
-      `inline`) is required: it both generates utilities *and* emits the custom
-      properties, so `:root` and the Recharts props can reference them.
-   2. `@theme inline` maps shadcn's semantic aliases onto those tokens, so the
-      unmodified shadcn primitives inherit the theme rather than needing every
-      utility class rewritten.
-
-  No dark mode: brief §5 puts theme polish out of scope and the topbar toggle
-  is documented as inert. The `dark` variant stays registered only because the
-  shadcn primitives ship `dark:` classes; `.dark` is never applied to the tree.
-*/
-
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  /* ---- Brand + status, from `design/design-system/Color Scheme.png` ---- */
   --color-ocean-green: #4ea674;
   --color-cyprus: #023337;
   --color-surf-crest: #c1e6ba;
@@ -39,36 +15,14 @@
   --color-error: #ef4343;
   --color-grey: #7c7c7c;
 
-  /*
-    Neutrals — sampled from the exports, not from the token sheet.
-    The page canvas, the sidebar's right border and every input fill were read
-    off `2 Dashboard.png` / `8 Add Product.png`. Note the canvas and the input
-    fill are the *same* colour: fields read as recessed only because they sit
-    on a white card.
-  */
   --color-canvas: #f9fafb;
   --color-surface: #ffffff;
   --color-hairline: #ecedee;
 
-  /*
-    Input/select/textarea border — a genuinely separate colour from the fill,
-    confirmed by scanline probes on two unrelated fields (05-MEASURED-SPEC.md
-    §8). Kept distinct from `--color-hairline` (#ECEDEE, sampled off card
-    borders) even though the two are close — different element, different
-    sample, no reason to assume they're meant to match.
-  */
   --color-field-border: #e5e7eb;
 
-  /* ---- Type ---- */
   --font-sans: var(--font-lato), ui-sans-serif, system-ui, sans-serif;
 
-  /*
-    Radii, each fitted to the corner curve of the real artwork rather than
-    taken from the spec (which said 8 / 16 across the board):
-      pill / nav item   8   — sidebar active item
-      button, input    10   — "Publish Product", every form field
-      card             12   — every panel on all three screens
-  */
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 10px;
@@ -78,24 +32,16 @@
   --radius-4xl: 24px;
   --radius-pill: 8px;
 
-  /*
-    Elevation. The spec described three symmetric ambient shadows; the artwork
-    is not symmetric — a card's top edge fades within 1px while its bottom edge
-    starts at ~16% black and fades over 3px. These reproduce that measured
-    falloff, so cards sit on the canvas the way the design shows.
-  */
   --shadow-ambient-1: 0 1px 2px rgb(16 24 40 / 0.05);
   --shadow-ambient-3:
     0 1px 3px rgb(16 24 40 / 0.1), 0 1px 2px rgb(16 24 40 / 0.06);
   --shadow-ambient-6:
     0 6px 16px rgb(16 24 40 / 0.1), 0 2px 4px rgb(16 24 40 / 0.06);
 
-  /* ---- Shell metrics, measured off every screen (they agree exactly) ---- */
   --spacing-sidebar: 260px;
   --spacing-sidebar-collapsed: 72px;
   --spacing-topbar: 96px;
 
-  /* Recharts series colours — the report chart is single-series ocean green */
   --color-chart-1: #4ea674;
   --color-chart-2: #6467f2;
 }
@@ -130,7 +76,6 @@
   --popover: var(--color-surface);
   --popover-foreground: var(--color-cyprus);
 
-  /* Ocean Green is the brand primary — CTAs, active nav, focus rings */
   --primary: var(--color-ocean-green);
   --primary-foreground: #ffffff;
 
@@ -147,14 +92,6 @@
 
   --border: var(--color-hairline);
 
-  /*
-    Fill only. `--input` feeds `--color-input` (see `@theme inline` above),
-    and Tailwind derives *both* `bg-input` and `border-input` from that one
-    variable — they can't be given different values through this token. The
-    field components deliberately don't use `border-input`; they use
-    `border-field-border` (`--color-field-border` in `@theme`, measured
-    separately) so the border can actually differ from the fill.
-  */
   --input: var(--color-canvas);
   --ring: var(--color-ocean-green);
 
@@ -167,23 +104,7 @@
   }
 
   body {
-    /*
-      `font-sans` goes on `body`, not `html`: `--font-lato` is scoped to the
-      class next/font puts on `<body>` (see app/layout.tsx), and custom
-      properties don't inherit upward — `font-sans` on `html` would resolve
-      an undefined variable and silently fall back to the browser default
-      font instead of Lato.
-    */
     @apply bg-background font-sans text-foreground;
-    /*
-      Body: 16 / 140%, per the type scale.
-
-      The scale calls this weight "Medium", but Lato ships 100/300/400/700/900
-      on Google Fonts — there is no 500. Requesting 500 makes the browser
-      synthesise a faux weight that reads heavier and blurrier than Lato
-      Regular, so every "Medium" in the scale maps to 400 here and only Bold
-      styles use 700.
-    */
     font-size: 16px;
     font-weight: 400;
     line-height: 1.4;
@@ -191,7 +112,6 @@
 }
 
 @utility text-title {
-  /* Title for Dashboard — Bold 18 at -2% tracking. Topbar and card titles. */
   font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -199,25 +119,18 @@
 }
 
 @utility text-section {
-  /*
-    Title / Body Large, 22px — the "Basic Details" / "Pricing" / "Inventory"
-    headings. The type sheet marks this Medium, but the Add Product artwork
-    draws it Bold, so it is Bold here.
-  */
   font-size: 22px;
   font-weight: 700;
   line-height: 1.3;
 }
 
 @utility text-caption {
-  /* Derived caption — the sub-16px text used for table heads and helper copy */
   font-size: 14px;
   font-weight: 400;
   line-height: 1.4;
 }
 
 @utility scrollbar-thin {
-  /* The scrollable regions in the design show a thin, low-contrast bar */
   scrollbar-width: thin;
   scrollbar-color: var(--color-hairline) transparent;
 }

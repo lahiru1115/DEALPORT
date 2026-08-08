@@ -40,7 +40,6 @@ import { cn } from "@/lib/utils";
 import { ImageUploader, type ImageUploaderHandle } from "./image-uploader";
 import { TagSelect } from "./tag-select";
 
-/** The five swatches in the kit's "Select your color" row, sampled at 2x. */
 const COLOR_SWATCHES = ["#D7EACB", "#ECD3D6", "#D5DDE0", "#ECE7C9", "#464A4D"];
 
 const STOCK_STATUS_LABELS: Record<string, string> = {
@@ -49,18 +48,11 @@ const STOCK_STATUS_LABELS: Record<string, string> = {
   OUT_OF_STOCK: "Out of Stock",
 };
 
-/** `YYYY-MM-DD` for `<input type="date">`, which rejects a full ISO timestamp. */
 function toDateInput(value: string | null): string | undefined {
   if (!value) return undefined;
   return value.slice(0, 10);
 }
 
-/**
- * Strips everything but digits and a single "." as the user types, rather
- * than only flagging it after the fact via `priceField`'s zod validation —
- * price and discounted price shouldn't accept letters or a second decimal
- * point in the first place.
- */
 function sanitizeDecimalInput(value: string): string {
   const cleaned = value.replace(/[^0-9.]/g, "");
   const firstDot = cleaned.indexOf(".");
@@ -68,7 +60,6 @@ function sanitizeDecimalInput(value: string): string {
   return cleaned.slice(0, firstDot + 1) + cleaned.slice(firstDot + 1).replaceAll(".", "");
 }
 
-/** Digits only — stock quantity is a whole-number count, no decimal point. */
 function sanitizeIntegerInput(value: string): string {
   return value.replace(/[^0-9]/g, "");
 }
@@ -147,10 +138,6 @@ export function ProductForm({ product }: { product?: Product }) {
         },
   });
 
-  // Bound once so the sanitizing `onChange` below can call RHF's own
-  // onChange itself, after mutating the DOM value — not through register's
-  // own `onChange` option, which runs too late: RHF already reads
-  // `event.target.value` into form state before that callback fires.
   const priceField = register("price");
   const discountedPriceField = register("discountedPrice");
   const stockQuantityField = register("stockQuantity");
@@ -160,23 +147,12 @@ export function ProductForm({ product }: { product?: Product }) {
   const discountedPrice = Number(watch("discountedPrice"));
   const colors = watch("colors") ?? [];
 
-  // The kit shows `Sale= $900.89` beside the discounted price — the saving,
-  // recomputed live. Only meaningful once both values are valid numbers.
   const saleAmount =
     Number.isFinite(price) && Number.isFinite(discountedPrice) && discountedPrice > 0 && price > discountedPrice
       ? (price - discountedPrice).toFixed(2)
       : null;
 
   const mutation = useMutation({
-    /*
-      Images upload to Cloudinary here, right before the save, rather than the
-      moment they're picked — see the note on `ImageUploader`. Cloudinary
-      groups each upload under `dealport/products/{productId}`, which for a
-      brand-new product doesn't exist yet: it's created first with no images,
-      then the staged files upload into its now-known id, then a follow-up
-      update attaches them. Editing an existing product already has an id, so
-      it uploads straight into that folder in one pass.
-    */
     mutationFn: async (payload: CreateProductPayload) => {
       if (product) {
         const images = await imageUploaderRef.current!.commitUploads(product.id);
@@ -204,13 +180,6 @@ export function ProductForm({ product }: { product?: Product }) {
     },
   });
 
-  /*
-    "Publish Product" and "Save to draft" are the same submit through the same
-    validation — they differ only in the `status` they post (plans/02-API.md §3).
-    Validation (via `handleSubmit`) runs before the mutation fires, so an
-    invalid form never triggers an image upload for a product that isn't
-    actually about to be saved.
-  */
   const submitAs = (status: ProductStatus) =>
     handleSubmit((values) => mutation.mutate({ ...values, status }));
 
@@ -247,11 +216,6 @@ export function ProductForm({ product }: { product?: Product }) {
         </div>
       </div>
 
-      {/*
-        Measured off `8 Add Product.png`: left card 612px, 20px gutter, right
-        card 486px within the 1118px content width. (The design doc estimated
-        62/38; the artwork is 55/45.)
-      */}
       <div className="grid gap-5 lg:grid-cols-[612fr_486fr]">
         <div className="space-y-6">
           <Card>
@@ -284,12 +248,6 @@ export function ProductForm({ product }: { product?: Product }) {
                     aria-invalid={Boolean(errors.description)}
                     {...register("description")}
                   />
-                  {/*
-                    Decorative only — the kit draws an edit and an AI-assist
-                    glyph here, and the design system documents the AI one as
-                    doing nothing. Rendered as inert marks rather than buttons
-                    so they read as ornament, not a broken affordance.
-                  */}
                   <div
                     aria-hidden="true"
                     className="pointer-events-none absolute right-4 bottom-3 flex items-center gap-3 text-grey"
@@ -324,11 +282,6 @@ export function ProductForm({ product }: { product?: Product }) {
                       priceField.onChange(event);
                     }}
                   />
-                  {/*
-                    USD is the only currency the API models (`currency` defaults
-                    to "USD"), so this is a fixed marker rather than a select
-                    that offers choices the backend would reject.
-                  */}
                   <span className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-base font-bold text-grey">
                     USD
                   </span>
@@ -486,8 +439,6 @@ export function ProductForm({ product }: { product?: Product }) {
                       checked={field.value}
                       onCheckedChange={(checked) => {
                         field.onChange(checked);
-                        // Clearing avoids posting a quantity the API would
-                        // ignore, and matches the field going disabled.
                         if (checked) setValue("stockQuantity", "", { shouldValidate: true });
                       }}
                     />

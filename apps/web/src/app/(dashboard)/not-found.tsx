@@ -3,7 +3,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
-/** Rendered inside the shell (sidebar + topbar) — e.g. a bad `/products/:id/edit` id. */
 export default function DashboardNotFound() {
   return (
     <div className="grid min-h-96 place-items-center">

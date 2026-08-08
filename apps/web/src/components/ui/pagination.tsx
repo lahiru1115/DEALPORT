@@ -2,11 +2,6 @@ import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-/**
- * `1 2 3 4 5 … 24` — measured off `3 Order Management.png`'s pagination
- * footer (Categories and Product List share the same pattern). Always keeps
- * the first and last page visible, with a single ellipsis collapsing the gap.
- */
 function pageWindow(current: number, total: number): (number | "ellipsis")[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
 

@@ -25,9 +25,6 @@ function ProductListFallback() {
 }
 
 export default function ProductsPage() {
-  // `useSearchParams` in ProductList opts the subtree into client rendering,
-  // so the boundary is required for the page to prerender. The fallback
-  // mirrors ProductList's own shape so the swap-in doesn't reflow.
   return (
     <Suspense fallback={<ProductListFallback />}>
       <ProductList />

@@ -18,12 +18,6 @@ function RadioGroup({
   )
 }
 
-/*
-  Radio fill is **indigo**, not the ocean-green primary — see design system §1
-  and §4. The only radio in the scoped screens is Add Product's "Tax Included"
-  Yes/No, which the design draws in #6467F2. Border stays a visible hairline at
-  rest so the unselected option does not disappear against a filled field.
-*/
 function RadioGroupItem({
   className,
   ...props

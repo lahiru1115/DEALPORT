@@ -4,16 +4,6 @@ import { Slot } from "radix-ui"
 
 import { cn } from "@/lib/utils"
 
-/*
-  Rethemed from the shadcn default to plans/03-DESIGN-SYSTEM.md §4:
-  Button Text is Bold 16, radius 8, default height 44.
-
-  The kit runs two CTA colours on purpose (§1): Ocean Green carries the primary
-  actions ("Publish Product", "Add Product", active pagination), and the indigo
-  #6467F2 carries the secondary affordances — the "Details", "View Insight",
-  "All product" and "See more" controls. `indigo` is a named variant rather than
-  a one-off className so that split stays visible at every call site.
-*/
 const buttonVariants = cva(
   "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding font-bold whitespace-nowrap transition-all outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/40 active:not-aria-[haspopup]:translate-y-px disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
   {
@@ -34,8 +24,6 @@ const buttonVariants = cva(
         link: "text-indigo underline-offset-4 hover:underline",
       },
       size: {
-        // 48px measured off "Publish Product" in `8 Add Product.png`; the
-        // same height every control in the kit uses.
         default: "h-12 gap-2 px-5 text-base",
         sm: "h-10 gap-1.5 px-4 text-caption [&_svg:not([class*='size-'])]:size-4",
         xs: "h-8 gap-1 rounded-md px-2.5 text-caption [&_svg:not([class*='size-'])]:size-4",

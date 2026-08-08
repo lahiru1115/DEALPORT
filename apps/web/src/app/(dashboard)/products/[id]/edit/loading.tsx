@@ -1,7 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Shown while `serverApi.products.get(id)` resolves on the edit page. */
 export default function EditProductLoading() {
   return (
     <div className="space-y-5">

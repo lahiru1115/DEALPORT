@@ -33,11 +33,6 @@ const PRISMA_STATUS_MAP: Record<string, HttpStatus> = {
   P2003: HttpStatus.BAD_REQUEST,
 };
 
-/**
- * Single error shape for the whole API — see plans/02-API.md §1.
- * Prisma error codes are translated so controllers/services never need to
- * know Postgres constraint names: P2025 -> 404, P2002 -> 409, P2003 -> 400.
- */
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);

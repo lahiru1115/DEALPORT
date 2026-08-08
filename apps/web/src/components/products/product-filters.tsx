@@ -37,14 +37,6 @@ const SORT_OPTIONS: { value: `${ProductSortField}:${SortOrder}`; label: string }
   { value: "totalOrders:desc", label: "Best selling" },
 ];
 
-/**
- * The tab strip is a single aqua-spring pill track with a white "active"
- * pill riding on top — measured off `3 Order Management.png`'s "All order /
- * Completed / Pending / Canceled" control, the same pattern `6 Categories.png`
- * uses. Tabs map to real query params: `status` for Published/Draft, a
- * `stockStatus` special-case for Out of Stock — there is no combined
- * "product status" enum that covers all four.
- */
 function TabButton({
   active,
   onClick,

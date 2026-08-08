@@ -1,5 +1,3 @@
-// Generated from design/icons/ai-beautify.svg — do not edit by hand.
-// Run `npm run icons:generate -w @dealport/web` to regenerate.
 import type { SVGProps } from "react";
 
 export function AiBeautifyIcon(props: SVGProps<SVGSVGElement>) {

@@ -49,11 +49,6 @@ const SUMMARY_FIELDS: {
   { key: "revenue", label: "Revenue", prefix: "$" },
 ];
 
-/**
- * `GET /dashboard/report` — server-rendered for `this-week` via `initialReport`
- * so the chart paints on first load with no client fetch; only switching to
- * "Last week" triggers one.
- */
 export function ReportCard({ initialReport }: { initialReport: DashboardReport }) {
   const [range, setRange] = useState<ReportRange>(initialReport.range);
 

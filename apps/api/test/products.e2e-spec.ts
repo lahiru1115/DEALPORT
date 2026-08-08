@@ -5,11 +5,6 @@ import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { AllExceptionsFilter } from '../src/common/filters/all-exceptions.filter';
 
-/**
- * Runs against this machine's real dev database (no separate test DB is
- * configured — see plans/00-BUILD-PLAN.md Phase 2 notes). Read assertions
- * lean on the seed data; every write test cleans up the fixture it creates.
- */
 describe('Products (e2e)', () => {
   let app: INestApplication<App>;
   let server: App;

@@ -1,5 +1,3 @@
-// Generated from design/icons/star-filled.svg — do not edit by hand.
-// Run `npm run icons:generate -w @dealport/web` to regenerate.
 import type { SVGProps } from "react";
 
 export function StarFilledIcon(props: SVGProps<SVGSVGElement>) {

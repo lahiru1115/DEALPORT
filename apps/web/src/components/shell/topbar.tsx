@@ -8,11 +8,6 @@ import { BellNotificationIcon, SearchIcon, SunLightModeIcon } from "@/components
 
 import { NAV_TITLES } from "./nav-config";
 
-/**
- * The theme toggle is drawn from the artwork but never wired up — the app is
- * light-only (globals.css: "brief §5 puts theme polish out of scope"). It
- * stays visible for fidelity, thumb pinned to the light-mode side.
- */
 function ThemeToggle() {
   return (
     <div

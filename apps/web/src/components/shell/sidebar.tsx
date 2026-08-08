@@ -16,22 +16,6 @@ import { cn } from "@/lib/utils";
 
 import { NAV_GROUPS, type NavItem } from "./nav-config";
 
-/**
- * Shared row styling for both real links and inert items — measured off
- * `2 Dashboard.png`: 42px tall, 8px radius, content starts 11px inside the
- * pill's own bounds (pill spans the full 232px inset; icon/label sit 11px in).
- *
- * `w-full` is required, not decorative: `<button>` is a form control, and
- * unlike `<div>`/`<a>`, form controls don't stretch to fill a block
- * container just because `display` is set to `flex` — they keep
- * shrink-to-fit sizing. Without `w-full` a collapsed (icon-only, no label
- * text to force width) inert nav button shrinks to exactly its icon's size,
- * so `justify-center` has no room to center anything and the icon sits
- * flush left instead — while the sibling `<Link>` rows, not being form
- * controls, stretch correctly and center fine. Confirmed via
- * `getBoundingClientRect()` in a real headless-Chrome render: button
- * width was 20px (= the icon) vs the link's 55px (= the full row).
- */
 const ROW_CLASS =
   "flex h-[42px] w-full items-center gap-3 rounded-pill px-3 text-base transition-colors";
 
@@ -54,7 +38,6 @@ function NavRow({
   const rowClass = cn(ROW_CLASS, collapsed && "justify-center px-0");
 
   if (!item.href) {
-    // Inert — present for fidelity, not wired to a screen (brief §5).
     return (
       <button
         type="button"

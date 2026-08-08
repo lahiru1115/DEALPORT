@@ -13,13 +13,6 @@ export const metadata: Metadata = {
   title: "Dashboard",
 };
 
-/*
-  Rendered as an RSC, not a client component with TanStack Query — every
-  widget here is read-only on first paint, so there is nothing to justify a
-  client cache. `ReportCard` is the one exception: its This week / Last week
-  toggle needs client state, so it alone owns a `"use client"` boundary and a
-  query, seeded with the `this-week` data fetched here to skip a double fetch.
-*/
 export default async function DashboardPage() {
   const [stats, report, transactions, topProducts, bestSelling, categories] = await Promise.all([
     serverApi.dashboard.stats(),

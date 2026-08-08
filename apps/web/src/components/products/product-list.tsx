@@ -72,9 +72,6 @@ export function ProductList() {
     router.push(`${pathname}?${updateSearchParams(searchParams, patch)}`, { scroll: false });
   }
 
-  // Debounced search -> URL, resetting to page 1. Skips the render where the
-  // debounced value hasn't caught up with the URL yet (e.g. a back/forward
-  // navigation that changed `search` directly).
   useEffect(() => {
     if (debouncedSearch === search) return;
     navigate({ search: debouncedSearch || undefined, page: undefined });
@@ -120,9 +117,6 @@ export function ProductList() {
     placeholderData: keepPreviousData,
   });
 
-  // Real per-tab counts, each a cheap `limit: 1` call read for `meta.total` —
-  // there is no aggregate endpoint, so this is four small requests rather
-  // than one invented one.
   const allCountQuery = useQuery({
     queryKey: ["products", "count", "all"],
     queryFn: () => api.products.list({ limit: 1 }),

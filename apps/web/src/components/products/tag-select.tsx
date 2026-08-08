@@ -7,12 +7,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-/**
- * The kit draws this as a plain select, but `tagIds` is an array — a native
- * select cannot express that. This keeps the select's trigger styling and puts
- * a checkbox list behind it, so the control looks as designed while actually
- * being multi-value.
- */
 export function TagSelect({
   tags,
   value,

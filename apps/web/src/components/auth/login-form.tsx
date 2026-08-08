@@ -13,23 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-/**
- * The seeded demo account (brief §9) — kept out of the rendered UI entirely
- * (see the "Continue with demo account" button below) rather than printed on
- * the page for a reviewer to copy, so there's nothing to select/paste and
- * nothing that looks like a real credential leaking onto the screen.
- */
 const DEMO_CREDENTIALS: LoginInput = {
   email: "admin@dealport.com",
   password: "Admin@123",
 };
 
-/**
- * Only the *path* is honoured, and only when it is a single-segment-rooted
- * relative path. `//evil.com` and `https://evil.com` are both valid values for
- * a query parameter and both would be treated as absolute by the router, so a
- * naive `router.push(next)` here is an open redirect.
- */
 function safeRedirectTarget(next: string | null): string {
   if (!next) return "/dashboard";
   if (!next.startsWith("/") || next.startsWith("//")) return "/dashboard";
@@ -52,7 +40,6 @@ export function LoginForm() {
     defaultValues: { email: "", password: "" },
   });
 
-  /** Shared by the real form submit and the one-click demo button. */
   async function performLogin(values: LoginInput) {
     setFormError(null);
 
@@ -74,11 +61,6 @@ export function LoginForm() {
       return;
     }
 
-    /*
-      `refresh()` before `push()` on purpose: the shell is a server component
-      that reads the session cookie, and without a refresh the router may serve
-      a cached, logged-out render of the destination.
-    */
     router.refresh();
     router.push(safeRedirectTarget(searchParams.get("next")));
   }
@@ -140,7 +122,6 @@ export function LoginForm() {
                 "text-grey transition-colors hover:text-cyprus",
                 "focus-visible:ring-3 focus-visible:ring-ring/25 focus-visible:outline-none",
               )}
-              // The control toggles visibility; its label states what it will do.
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (

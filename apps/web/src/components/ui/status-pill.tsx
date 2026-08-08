@@ -3,14 +3,6 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
-/*
-  Dot + label, per design system §4. Three tones map to the status tokens:
-  success / pending / error. `neutral` covers Draft, which the kit renders as a
-  de-emphasised grey rather than a fourth semantic colour.
-
-  The dot is not the only signal — the label is always present — so this stays
-  readable without relying on colour alone.
-*/
 const statusPillVariants = cva(
   "text-caption inline-flex items-center gap-2 rounded-full px-3 py-1 font-bold whitespace-nowrap",
   {

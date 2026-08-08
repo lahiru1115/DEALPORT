@@ -8,13 +8,6 @@ export const metadata: Metadata = {
   title: "Sign in",
 };
 
-/*
-  The kit contains no login mockup — the nine screens in `design/screens/` are
-  all post-authentication. This is built from the design system instead (Lato,
-  ocean-green CTA, filled borderless fields, 12px card on the #F9FAFB canvas),
-  so it belongs to the same product without inventing a layout the design
-  never specified.
-*/
 export default function LoginPage() {
   return (
     <main className="grid min-h-dvh place-items-center bg-canvas px-5 py-10">
@@ -36,11 +29,6 @@ export default function LoginPage() {
             Sign in to manage your products and orders.
           </p>
 
-          {/*
-            `useSearchParams` (for the post-login `?next=`) opts the subtree into
-            client-side rendering, so the boundary is required for the page to
-            prerender.
-          */}
           <Suspense fallback={<div className="h-90" />}>
             <LoginForm />
           </Suspense>

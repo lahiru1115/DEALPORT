@@ -15,11 +15,6 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-/**
- * A plain dot + coloured word, not the filled `StatusPill` badge — the kit
- * draws this one without a background, unlike the Transaction table's status
- * column just above it in the same layout.
- */
 function StockWord({ inStock }: { inStock: boolean }) {
   return (
     <span
@@ -34,7 +29,6 @@ function StockWord({ inStock }: { inStock: boolean }) {
   );
 }
 
-/** `GET /products/best-selling` — the brief's other explicit API-driven widget. */
 export function BestSellingCard({ products }: { products: WidgetProduct[] }) {
   return (
     <Card className="col-span-3 flex flex-col lg:col-span-2">
