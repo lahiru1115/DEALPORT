@@ -2,6 +2,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { Prisma, ProductStatus, StockStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadsService } from '../uploads/uploads.service';
 import { ProductsService } from './products.service';
 
 const decimal = (value: number) => new Prisma.Decimal(value);
@@ -50,6 +51,7 @@ describe('ProductsService', () => {
     };
     $transaction: jest.Mock;
   };
+  let uploads: { destroyImages: jest.Mock };
 
   beforeEach(async () => {
     prisma = {
@@ -63,9 +65,14 @@ describe('ProductsService', () => {
       },
       $transaction: jest.fn(),
     };
+    uploads = { destroyImages: jest.fn().mockResolvedValue(undefined) };
 
     const module = await Test.createTestingModule({
-      providers: [ProductsService, { provide: PrismaService, useValue: prisma }],
+      providers: [
+        ProductsService,
+        { provide: PrismaService, useValue: prisma },
+        { provide: UploadsService, useValue: uploads },
+      ],
     }).compile();
 
     service = module.get(ProductsService);
@@ -297,6 +304,33 @@ describe('ProductsService', () => {
         expect.objectContaining({ where: { id: 'prod_1' } }),
       );
     });
+
+    it('destroys only the Cloudinary images that were dropped from the new image list', async () => {
+      prisma.product.findUnique.mockResolvedValue(
+        buildProduct({
+          images: [
+            { publicId: 'kept', url: 'https://a', isPrimary: true, position: 0 },
+            { publicId: 'removed', url: 'https://b', isPrimary: false, position: 1 },
+          ],
+        }),
+      );
+      prisma.product.update.mockResolvedValue(buildProduct());
+
+      await service.update('prod_1', {
+        images: [{ url: 'https://a', publicId: 'kept' }],
+      });
+
+      expect(uploads.destroyImages).toHaveBeenCalledWith(['removed']);
+    });
+
+    it('does not touch Cloudinary when images are left untouched', async () => {
+      prisma.product.findUnique.mockResolvedValue(buildProduct());
+      prisma.product.update.mockResolvedValue(buildProduct());
+
+      await service.update('prod_1', { status: ProductStatus.PUBLISHED });
+
+      expect(uploads.destroyImages).not.toHaveBeenCalled();
+    });
   });
 
   describe('remove', () => {
@@ -314,6 +348,19 @@ describe('ProductsService', () => {
       await service.remove('prod_1');
 
       expect(prisma.product.delete).toHaveBeenCalledWith({ where: { id: 'prod_1' } });
+    });
+
+    it('destroys every image the deleted product had on Cloudinary', async () => {
+      prisma.product.findUnique.mockResolvedValue(
+        buildProduct({
+          images: [{ publicId: 'a', url: 'https://a', isPrimary: true, position: 0 }],
+        }),
+      );
+      prisma.product.delete.mockResolvedValue(undefined);
+
+      await service.remove('prod_1');
+
+      expect(uploads.destroyImages).toHaveBeenCalledWith(['a']);
     });
   });
 

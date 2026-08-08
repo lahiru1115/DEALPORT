@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { Prisma, ProductStatus, StockStatus } from '@prisma/client';
 import { paginate } from '../common/dto/paginated-response.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadsService } from '../uploads/uploads.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductQueryDto } from './dto/product-query.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -24,7 +25,10 @@ const WIDGET_SELECT = {
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly uploads: UploadsService,
+  ) {}
 
   async findAll(query: ProductQueryDto) {
     const { search, categoryId, status, stockStatus, featured, page, limit, sortBy, sortOrder } =
@@ -108,7 +112,7 @@ export class ProductsService {
   }
 
   async update(id: string, dto: UpdateProductDto) {
-    await this.findOne(id);
+    const existing = await this.findOne(id);
     this.assertPriceAndSaleWindow(dto);
 
     const product = await this.prisma.product.update({
@@ -134,12 +138,22 @@ export class ProductsService {
       },
       include: PRODUCT_INCLUDE,
     });
+
+    if (dto.images) {
+      const keptPublicIds = new Set(dto.images.map((image) => image.publicId));
+      const removedPublicIds = existing.images
+        .filter((image) => !keptPublicIds.has(image.publicId ?? undefined))
+        .map((image) => image.publicId);
+      void this.uploads.destroyImages(removedPublicIds);
+    }
+
     return formatProductMoney(product);
   }
 
   async remove(id: string): Promise<void> {
-    await this.findOne(id);
+    const existing = await this.findOne(id);
     await this.prisma.product.delete({ where: { id } });
+    void this.uploads.destroyImages(existing.images.map((image) => image.publicId));
   }
 
   async topProducts(limit: number) {

@@ -80,6 +80,29 @@ export class UploadsService {
     };
   }
 
+  /**
+   * Best-effort cleanup — called when a product's images are replaced or the
+   * product itself is deleted. Never throws: an orphaned Cloudinary asset is
+   * a cost/clutter issue, not a reason to fail the request that already
+   * committed the DB change.
+   */
+  async destroyImages(publicIds: (string | null | undefined)[]): Promise<void> {
+    const ids = publicIds.filter((id): id is string => Boolean(id));
+    if (!this.configured || ids.length === 0) {
+      return;
+    }
+
+    await Promise.all(
+      ids.map(async (publicId) => {
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (error) {
+          this.logger.error(`Failed to destroy Cloudinary asset "${publicId}"`, error);
+        }
+      }),
+    );
+  }
+
   private uploadBuffer(buffer: Buffer, folder: string): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream({ folder }, (error, result) => {
